@@ -4,8 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { NextPage } from 'next';
 import Head from 'next/head';
 import DashboardLayout from '../components/layout/DashboardLayout';
-import SubscriptionCard from '../components/ui/SubscriptionCard';
-import { Search, Filter, Grid, List, Loader } from 'lucide-react';
+import SubscriptionCard from '../components/ui/SubscriptionCard2';
+import { Search, Filter, Grid, List } from 'lucide-react';
 
 // Define interfaces for the backend and frontend data structures
 interface BackendSubscriptionService {
@@ -217,84 +217,83 @@ const SubscriptionsPage: NextPage = () => {
       )}
 
       {/* Subscriptions Grid/List */}
-      {!loading && !error && (
-        <>
-          {viewMode === 'grid' ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {viewMode === 'grid' ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 xl:gap-8">
+          {filteredServices.map(service => (
+            <SubscriptionCard key={service.id} service={service} />
+          ))}
+        </div>
+      ) : (
+        <div className="bg-gray-800 rounded-xl overflow-hidden">
+          <table className="w-full">
+            <thead>
+              <tr className="bg-gray-900 text-gray-400 text-left">
+                <th className="px-6 py-3 text-xs font-medium uppercase tracking-wider">Service</th>
+                <th className="px-6 py-3 text-xs font-medium uppercase tracking-wider">Category</th>
+                <th className="px-6 py-3 text-xs font-medium uppercase tracking-wider">Price</th>
+                <th className="px-6 py-3 text-xs font-medium uppercase tracking-wider">Active Pools</th>
+                <th className="px-6 py-3 text-xs font-medium uppercase tracking-wider">Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-700">
               {filteredServices.map(service => (
-                <SubscriptionCard key={service.id} service={service} />
-              ))}
-            </div>
-          ) : (
-            <div className="bg-gray-800 rounded-xl overflow-hidden">
-              <table className="w-full">
-                <thead>
-                  <tr className="bg-gray-900 text-gray-400 text-left">
-                    <th className="px-6 py-3 text-xs font-medium uppercase tracking-wider">Service</th>
-                    <th className="px-6 py-3 text-xs font-medium uppercase tracking-wider">Category</th>
-                    <th className="px-6 py-3 text-xs font-medium uppercase tracking-wider">Price</th>
-                    <th className="px-6 py-3 text-xs font-medium uppercase tracking-wider">Active Pools</th>
-                    <th className="px-6 py-3 text-xs font-medium uppercase tracking-wider">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-700">
-                  {filteredServices.map(service => (
-                    <tr key={service.id} className="hover:bg-gray-750">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="h-8 w-8 relative rounded-lg overflow-hidden bg-gray-700 flex items-center justify-center mr-3">
-                            <div 
-                              style={{ 
-                                backgroundColor: service.color,
-                                width: '100%',
-                                height: '100%',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                              }}
-                            >
-                              {/* This would normally be an Image component */}
-                              <span className="text-xs text-white font-bold">{service.name.substring(0, 2)}</span>
-                            </div>
-                          </div>
-                          <div>
-                            <div className="font-medium">{service.name}</div>
-                            <div className="text-gray-400 text-xs truncate max-w-xs">{service.description}</div>
-                          </div>
+                <tr key={service.id} className="hover:bg-gray-750">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <div className="h-8 w-8 relative rounded-lg overflow-hidden bg-gray-700 flex items-center justify-center mr-3">
+                        <div 
+                          style={{ 
+                            backgroundColor: service.color,
+                            width: '100%',
+                            height: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                        >
+                          {/* This would normally be an Image component */}
+                          <span className="text-xs text-white font-bold">{service.name.substring(0, 2)}</span>
                         </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">{service.category}</td>
-                      <td className="px-6 py-4 whitespace-nowrap font-medium">${service.price.toFixed(2)}/mo</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">{service.activePools}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <button className="bg-purple-600 hover:bg-purple-700 text-white py-1 px-3 rounded-md text-sm transition duration-200">
-                          View Pools
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-          
-          {/* Empty state */}
-          {filteredServices.length === 0 && (
-            <div className="bg-gray-800 rounded-xl p-8 text-center">
-              <div className="mx-auto w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mb-4">
-                <Search size={24} className="text-gray-500" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">No subscriptions found</h3>
-              <p className="text-gray-400 mb-4">Try adjusting your search or filter criteria</p>
-              <button 
-                className="bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-md transition duration-200"
-                onClick={resetFilters}
-              >
-                Clear Filters
-              </button>
-            </div>
-          )}
-        </>
+                      </div>
+                      <div>
+                        <div className="font-medium">{service.name}</div>
+                        <div className="text-gray-400 text-xs truncate max-w-xs">{service.description}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">{service.category}</td>
+                  <td className="px-6 py-4 whitespace-nowrap font-medium">${service.price.toFixed(2)}/mo</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">{service.activePools}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <button className="bg-purple-600 hover:bg-purple-700 text-white py-1 px-3 rounded-md text-sm transition duration-200">
+                      View Pools
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+      
+      {/* Empty state */}
+      {filteredServices.length === 0 && (
+        <div className="bg-gray-800 rounded-xl p-8 text-center">
+          <div className="mx-auto w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mb-4">
+            <Search size={24} className="text-gray-500" />
+          </div>
+          <h3 className="text-xl font-semibold mb-2">No subscriptions found</h3>
+          <p className="text-gray-400 mb-4">Try adjusting your search or filter criteria</p>
+          <button 
+            className="bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-md transition duration-200"
+            onClick={() => {
+              setSearchTerm('');
+              setSelectedCategory('All');
+            }}
+          >
+            Clear Filters
+          </button>
+        </div>
       )}
     </DashboardLayout>
   );
