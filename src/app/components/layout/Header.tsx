@@ -1,5 +1,5 @@
 // components/layout/Header.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Bell, Search, Menu, X } from 'lucide-react';
 import UserMenu from '../ui/UserMenu';
 
@@ -10,11 +10,26 @@ interface HeaderProps {
 
 export default function Header({ sidebarCollapsed, toggleSidebar }: HeaderProps) {
   const [searchOpen, setSearchOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
   
+  // Use useEffect to safely access window after component mounts
+  useEffect(() => {
+    setIsMounted(true);
+    setIsDesktop(window.innerWidth >= 768);
+    
+    const handleResize = () => {
+      setIsDesktop(window.innerWidth >= 768);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   return (
     <header className="h-16 bg-gray-900 border-b border-gray-800 flex items-center justify-between px-6">
       <div className="flex items-center">
-        <button 
+        <button
           onClick={toggleSidebar}
           className="text-gray-400 hover:text-white mr-4 lg:hidden"
         >
@@ -22,7 +37,8 @@ export default function Header({ sidebarCollapsed, toggleSidebar }: HeaderProps)
         </button>
         
         <div className={`relative ${searchOpen ? 'w-64' : 'w-auto'} md:w-64 transition-all duration-300`}>
-          {searchOpen || window.innerWidth >= 768 ? (
+          {/* Only render once component is mounted and either searchOpen is true or we're on desktop */}
+          {isMounted && (searchOpen || isDesktop) ? (
             <div className="relative">
               <input
                 type="text"
@@ -32,7 +48,7 @@ export default function Header({ sidebarCollapsed, toggleSidebar }: HeaderProps)
               <Search size={16} className="absolute left-3 top-2.5 text-gray-400" />
             </div>
           ) : (
-            <button 
+            <button
               onClick={() => setSearchOpen(true)}
               className="text-gray-400 hover:text-white"
             >
