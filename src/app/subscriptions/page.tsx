@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { NextPage } from 'next';
 import Head from 'next/head';
 import DashboardLayout from '../components/layout/DashboardLayout';
-import SubscriptionCard from '../components/ui/SubscriptionCard';
+import SubscriptionCard from '../components/ui/SubscriptionCard2';
 import { Search, Filter, Grid, List } from 'lucide-react';
 
 // Mock data for available subscription services
@@ -180,7 +180,7 @@ const SubscriptionsPage: NextPage = () => {
       
       {/* Subscriptions Grid/List */}
       {viewMode === 'grid' ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 xl:gap-8">
           {filteredServices.map(service => (
             <SubscriptionCard key={service.id} service={service} />
           ))}
