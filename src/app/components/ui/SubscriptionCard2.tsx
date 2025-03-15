@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Plus } from 'lucide-react';
 
@@ -17,6 +17,7 @@ interface SubscriptionCardProps {
 }
 
 export default function SubscriptionCard({ service, onClick }: SubscriptionCardProps) {
+  const [isHovering, setIsHovering] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
   
   // Function to truncate text if needed
@@ -35,60 +36,77 @@ export default function SubscriptionCard({ service, onClick }: SubscriptionCardP
     }
     return 85;
   };
+  useEffect(() => {
+    if (isHovering) {
+      const timer = setTimeout(() => setIsFlipped(true), 100);
+      return () => clearTimeout(timer);
+    } else {
+      const timer = setTimeout(() => setIsFlipped(false), 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isHovering]);
   
   return (
     <div 
-      className="aspect-square w-full perspective-1000 group cursor-pointer"
-      onMouseEnter={() => setIsFlipped(true)}
-      onMouseLeave={() => setIsFlipped(false)}
-      onClick={onClick}
-    >
+    className={`
+      aspect-square w-full perspective-1000 group cursor-pointer
+      transition-transform duration-300 
+      ${isHovering ? 'scale-[1]' : ''}
+    `}
+    onMouseEnter={() => setIsHovering(true)}
+    onMouseLeave={() => setIsHovering(false)}
+    onClick={onClick}
+  >
       <div className={`relative w-full h-full transition-transform duration-500 transform-style-3d ${isFlipped ? 'rotate-y-180' : ''}`}>
         {/* Front of card - Full Logo */}
         <div 
-          className="absolute w-full h-full backface-hidden rounded-xl overflow-hidden transition-all duration-300 shadow-md" 
-          style={{ 
-            background: 'linear-gradient(to bottom, #1a1f2e, #131722)',
-            borderTop: `3px solid ${service.color}`,
-            borderLeft: `1px solid ${service.color}30`,
-            borderRight: `1px solid ${service.color}30`,
-          }}
-        >
+  className="absolute w-full h-full backface-hidden rounded-xl overflow-hidden transition-all duration-300 shadow-md" 
+  style={{ 
+    background: 'linear-gradient(to bottom, #1a1f2e, #131722)',
+    borderTop: `3px solid ${service.color}`,
+    borderLeft: `1px solid ${service.color}30`,
+    borderRight: `1px solid ${service.color}30`,
+    boxShadow: isHovering ? `0 0 15px ${service.color}20` : 'none',
+  }}
+>
           {/* Logo fills entire card */}
           <div className="flex flex-col items-center justify-center h-full relative">
             {/* Large logo as background */}
-            <div className="absolute inset-0 flex items-center justify-center p-8">
+            <div className="absolute inset-0 flex items-center justify-center p-0">
               <div className="relative w-full h-full">
                 <Image 
                   src={service.logo} 
                   alt={service.name}
                   layout="fill"
-                  objectFit="contain"
+                  objectFit="cover"
+                  className="transform scale-110"
                 />
               </div>
             </div>
             
             {/* Overlay gradient */}
-            <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 to-transparent"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-gray-900/70 to-transparent"></div>
             
             {/* Service name at bottom */}
             <div className="absolute bottom-0 left-0 right-0 p-4 text-center">
               <h3 className="text-xl font-bold text-white mb-1">{service.name}</h3>
-              <div className="text-purple-400 text-xs font-medium">Hover to see details</div>
+              {/* <div className="text-purple-400 text-xs font-medium">Hover to see details</div> */}
             </div>
           </div>
         </div>
         
         {/* Back of card - Compact layout */}
-        <div 
-          className="absolute w-full h-full backface-hidden rounded-xl overflow-hidden shadow-md rotate-y-180" 
-          style={{ 
-            background: 'linear-gradient(to bottom, #1a1f2e, #131722)',
-            borderTop: `3px solid ${service.color}`,
-            borderLeft: `1px solid ${service.color}30`,
-            borderRight: `1px solid ${service.color}30`,
-          }}
-        >
+       {/* Back of card - Compact layout */}
+<div 
+  className="absolute w-full h-full backface-hidden rounded-xl overflow-hidden shadow-md rotate-y-180" 
+  style={{ 
+    background: 'linear-gradient(to bottom, #1a1f2e, #131722)',
+    borderTop: `3px solid ${service.color}`,
+    borderLeft: `1px solid ${service.color}30`,
+    borderRight: `1px solid ${service.color}30`,
+    boxShadow: isHovering ? `0 0 15px ${service.color}20` : 'none',
+  }}
+>
           <div className="flex flex-col h-full justify-between">
             {/* Top section with service info */}
             <div>
@@ -99,8 +117,8 @@ export default function SubscriptionCard({ service, onClick }: SubscriptionCardP
                     <Image 
                       src={service.logo} 
                       alt={service.name} 
-                      width={16} 
-                      height={16} 
+                      width={24} 
+                      height={24} 
                     />
                   </div>
                   <h3 className="text-base font-semibold text-white truncate max-w-32">{service.name}</h3>
