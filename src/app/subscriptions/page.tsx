@@ -1,13 +1,37 @@
-// pages/subscriptions.tsx
 'use client'
 import React, { useState, useEffect } from 'react';
 import { NextPage } from 'next';
 import Head from 'next/head';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import SubscriptionCard from '../components/ui/SubscriptionCard2';
-import { Search, Filter } from 'lucide-react';
+import { Search, Filter, Loader } from 'lucide-react';
 
-// Mock data for available subscription services
+// Define the subscription service type based on your schema
+interface SubscriptionService {
+  serviceId: string;
+  name: string;
+  slug: string;
+  logoUrl: string;
+  description: string;
+  color: string;
+  category: string;
+  regionsAvailable: string[];
+  featuredPosition: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Define the type expected by SubscriptionCard component
+interface CardService {
+  id: string;
+  name: string;
+  logo: string;
+  price: number;
+  description: string;
+  color: string;
+  category?: string;
+  activePools?: number;
+}
 const services = [
   {
     id: '1',
@@ -101,96 +125,55 @@ const services = [
   }
 ];
 
-// Categories for filtering
-const categories = ['All', 'Entertainment', 'Music', 'Shopping & Entertainment', 'Productivity'];
-
 const SubscriptionsPage: NextPage = () => {
+  const [services, setServices] = useState<CardService[]>([]);
+  const [categories, setCategories] = useState<string[]>(['All']);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [services, setServices] = useState<SubscriptionService[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Helper function to generate consistent colors based on service name
-  const getServiceColor = (name: string): string => {
-    // Simple hash function to generate consistent colors
-    const hash = Array.from(name).reduce(
-      (acc, char) => char.charCodeAt(0) + ((acc << 5) - acc), 0
-    );
-    const hue = hash % 360;
-    return `hsl(${hue}, 70%, 50%)`;
-  };
-
-  // Helper function to assign categories based on service name
-  const determineCategory = (name: string): string => {
-    const nameLower = name.toLowerCase();
-    if (nameLower.includes('netflix') || nameLower.includes('hulu') || 
-        nameLower.includes('youtube') || nameLower.includes('disney')) {
-      return 'Entertainment';
-    } else if (nameLower.includes('spotify') || nameLower.includes('music') || 
-              nameLower.includes('apple music')) {
-      return 'Music';
-    } else if (nameLower.includes('amazon') || nameLower.includes('prime')) {
-      return 'Shopping & Entertainment';
-    } else {
-      return 'Productivity';
-    }
-  };
-
-  // Helper function to generate consistent but random-looking number of active pools
-  const getRandomActivePools = (name: string): number => {
-    // Create a deterministic but seemingly random number based on the name
-    const hash = Array.from(name).reduce(
-      (acc, char) => char.charCodeAt(0) + ((acc << 5) - acc), 0
-    );
-    return (hash % 15) + 1; // 1-15 active pools
-  };
-
-  // Transform backend data to frontend format
-  const transformBackendData = (backendData: BackendSubscriptionService[]): SubscriptionService[] => {
-    return backendData.map(service => ({
-      logoUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(service.name)}&background=${getServiceColor(service.name).replace('#', '')}&color=fff`,
-      
-      id: service.serviceId,
-      name: service.name,
-      logo: service.name.substring(0, 2), // Placeholder for logo
-      price: parseFloat(service.monthlyCost),
-      description: service.description,
-      color: getServiceColor(service.name),
-      category: determineCategory(service.name),
-      activePools: getRandomActivePools(service.name),
-    }));
-  };
-
   // Fetch subscription services from API
   useEffect(() => {
-    const fetchSubscriptionServices = async () => {
+    const fetchServices = async () => {
       try {
-        setLoading(true);
-        // Fetch directly from your backend API
+        setIsLoading(true);
         const response = await fetch('http://localhost:3001/api/subscription-services');
         
         if (!response.ok) {
-          throw new Error(`Error ${response.status}: ${response.statusText}`);
+          throw new Error(`Error: ${response.status}`);
         }
         
-        const backendData: BackendSubscriptionService[] = await response.json();
+        const data: SubscriptionService[] = await response.json();
         
-        // Transform data to match frontend interface
-        const transformedServices = transformBackendData(backendData);
+        // Extract unique categories for filter dropdown
+        const uniqueCategories = [...new Set(data.map(service => service.category))].filter(Boolean);
+        setCategories(['All', ...uniqueCategories]);
+        
+        // Transform API data to format expected by SubscriptionCard
+        const transformedServices: CardService[] = data.map(service => ({
+          id: service.serviceId,
+          name: service.name,
+          logo: service.logoUrl || '/assets/logos/placeholder.svg',
+          price: parseFloat((Math.random() * 20 + 5).toFixed(2)), // Random price between 5 and 25
+          description: service.description || 'No description available',
+          color: service.color || '#888888',
+          category: service.category,
+          activePools: Math.floor(Math.random() * 15) + 1 // Random number of pools between 1 and 15
+        }));
+        
         setServices(transformedServices);
-        setLoading(false);
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-        setError(`Error loading subscription services: ${errorMessage}`);
-        setLoading(false);
-        console.error('Error fetching subscription services:', err);
+        console.error('Failed to fetch subscription services:', err);
+        setError('Failed to load subscription services. Please try again later.');
+      } finally {
+        setIsLoading(false);
       }
     };
-
-    fetchSubscriptionServices();
+    
+    fetchServices();
   }, []);
-
+  
   // Filter services based on search term and category
   const filteredServices = services.filter(service => {
     const matchesSearch = service.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -198,10 +181,10 @@ const SubscriptionsPage: NextPage = () => {
     return matchesSearch && matchesCategory;
   });
 
-  // Handle filtering and search reset
-  const resetFilters = () => {
-    setSearchTerm('');
-    setSelectedCategory('All');
+  // Handle card click
+  const handleCardClick = (serviceId: string) => {
+    console.log(`Clicked on service: ${serviceId}`);
+    // Here you would implement navigation to service details or join pool functionality
   };
   
   return (
@@ -247,15 +230,42 @@ const SubscriptionsPage: NextPage = () => {
         </div>
       </div>
       
+      {/* Loading State */}
+      {isLoading && (
+        <div className="flex flex-col items-center justify-center py-12">
+          <Loader size={32} className="text-purple-500 animate-spin mb-4" />
+          <p className="text-gray-400">Loading subscription services...</p>
+        </div>
+      )}
+      
+      {/* Error State */}
+      {error && (
+        <div className="bg-red-900/30 border border-red-500/50 rounded-xl p-6 mb-6">
+          <p className="text-red-200 font-semibold">{error}</p>
+          <button 
+            className="mt-4 bg-red-500 hover:bg-red-600 text-white py-1 px-4 rounded-md text-sm transition duration-200"
+            onClick={() => window.location.reload()}
+          >
+            Retry
+          </button>
+        </div>
+      )}
+      
       {/* Subscriptions Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 xl:gap-8">
-        {filteredServices.map(service => (
-          <SubscriptionCard key={service.id} service={service} />
-        ))}
-      </div>
+      {!isLoading && !error && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 xl:gap-8">
+          {filteredServices.map(service => (
+            <SubscriptionCard 
+              key={service.id} 
+              service={service} 
+              onClick={() => handleCardClick(service.id)}
+            />
+          ))}
+        </div>
+      )}
       
       {/* Empty state */}
-      {filteredServices.length === 0 && (
+      {!isLoading && !error && filteredServices.length === 0 && (
         <div className="bg-gray-800 rounded-xl p-8 text-center">
           <div className="mx-auto w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mb-4">
             <Search size={24} className="text-gray-500" />
