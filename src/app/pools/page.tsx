@@ -4,7 +4,7 @@ import { NextPage } from 'next';
 import Head from 'next/head';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import PoolCard from '../components/ui/PoolCard';
-import { Plus, Search, Filter, ArrowDown, Settings } from 'lucide-react';
+import { Plus, Search, Filter, ArrowDown, Settings, Users } from 'lucide-react';
 import Image from 'next/image';
 
 // Mock data
