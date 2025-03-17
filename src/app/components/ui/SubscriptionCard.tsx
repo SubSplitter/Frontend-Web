@@ -16,53 +16,36 @@ interface SubscriptionCardProps {
 }
 
 export default function SubscriptionCard({ service, onClick }: SubscriptionCardProps) {
-  // Check if logo is a valid URL or path
-  const isValidImageSrc = service.logo && (
-    service.logo.startsWith('/') || 
-    service.logo.startsWith('http://') || 
-    service.logo.startsWith('https://')
-  );
-
   return (
-    <div className="rounded-lg overflow-hidden shadow-md bg-white border border-gray-200">
-      <div className="p-4">
-        <div className="flex items-center space-x-3">
-          {isValidImageSrc ? (
-            <div className="flex-shrink-0">
-              <Image 
-                src={service.logo} 
-                alt={`${service.name} logo`}
-                width={40}
-                height={40}
-                className="rounded-full"
-              />
-            </div>
-          ) : (
-            <div 
-              className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center"
-              style={{ backgroundColor: service.color || '#4F46E5' }}
-            >
-              <span className="text-white font-bold text-sm">
-                {service.name.substring(0, 2).toUpperCase()}
-              </span>
-            </div>
-          )}
-          <div>
-            <p className="text-lg font-semibold text-gray-900">${service.price.toFixed(2)}/mo</p>
-            <h3 className="text-xl font-bold">{service.name}</h3>
-            <p className="text-gray-500">{service.description}</p>
-            {service.activePools !== undefined && (
-              <p className="text-sm text-gray-500 mt-1">
-                {service.activePools} active pools
-              </p>
-            )}
+    <div 
+      className="bg-gray-800 rounded-xl overflow-hidden transition-all duration-300 hover:shadow-lg hover:translate-y-[-4px]" 
+      style={{ borderTop: `4px solid ${service.color}` }}
+      onClick={onClick}
+    >
+      <div className="p-5">
+        <div className="flex items-center justify-between mb-4">
+          <div className="h-12 w-12 relative rounded-lg overflow-hidden bg-gray-700 flex items-center justify-center">
+            <Image 
+              src={service.logo} 
+              alt={service.name} 
+              width={36} 
+              height={36} 
+            />
           </div>
+          <div className="text-xl font-bold text-white">${service.price.toFixed(2)}<span className="text-sm text-gray-400">/mo</span></div>
         </div>
-        <button
-          onClick={onClick}
-          className="mt-4 w-full flex items-center justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
-        >
-          <Plus className="mr-2 h-4 w-4" />
+        
+        <h3 className="text-lg font-semibold mb-2">{service.name}</h3>
+        <p className="text-gray-400 text-sm mb-4">{service.description}</p>
+        
+        {service.activePools !== undefined && (
+          <div className="text-sm text-gray-300 mb-4">
+            <span className="font-medium">{service.activePools}</span> active pools
+          </div>
+        )}
+        
+        <button className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-md flex items-center justify-center transition duration-200">
+          <Plus size={16} className="mr-2" />
           Join Pool
         </button>
       </div>

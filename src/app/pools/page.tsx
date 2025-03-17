@@ -1,110 +1,13 @@
-'use client'// pages/pools.tsx
-import React, { useState } from 'react';
+'use client'
+// pages/pools.tsx
+import React, { useState, useEffect } from 'react';
 import { NextPage } from 'next';
 import Head from 'next/head';
 import DashboardLayout from '../components/layout/DashboardLayout';
-import PoolCard from '../components/ui/PoolCard';
+import PoolCard from '../components/ui/PoolCard2';
 import { Plus, Search, Filter, ArrowDown, Settings, Users } from 'lucide-react';
-import Image from 'next/image';
-
-// Mock data
-const poolsData = [
-  {
-    id: '1',
-    serviceName: 'Netflix',
-    serviceLogo: '/assets/logos/netflix.svg',
-    serviceColor: '#E50914',
-    plan: 'Premium',
-    totalCost: 15.99,
-    splitCost: 3.99,
-    members: [
-      { id: '1', name: 'John Smith', isPrimary: true },
-      { id: '2', name: 'Alice Johnson' },
-      { id: '3', name: 'Bob Williams' },
-      { id: '4', name: 'Emma Davis' }
-    ],
-    capacity: 5,
-    expiresAt: '2025-04-15T00:00:00Z',
-    status: 'active',
-    lastPayment: '2025-03-15T00:00:00Z'
-  },
-  {
-    id: '2',
-    serviceName: 'Spotify',
-    serviceLogo: '/assets/logos/spotify.svg',
-    serviceColor: '#1DB954',
-    plan: 'Family Plan',
-    totalCost: 14.99,
-    splitCost: 3.75,
-    members: [
-      { id: '1', name: 'John Smith' },
-      { id: '2', name: 'Alice Johnson', isPrimary: true },
-      { id: '3', name: 'Chris Moore' },
-      { id: '5', name: 'David Lee' }
-    ],
-    capacity: 6,
-    expiresAt: '2025-03-28T00:00:00Z',
-    status: 'active',
-    lastPayment: '2025-02-28T00:00:00Z'
-  },
-  {
-    id: '3',
-    serviceName: 'Disney+',
-    serviceLogo: '/assets/logos/disneyplus.svg',
-    serviceColor: '#0063E5',
-    plan: 'Standard',
-    totalCost: 8.99,
-    splitCost: 2.25,
-    members: [
-      { id: '1', name: 'John Smith' },
-      { id: '6', name: 'Sarah Thompson', isPrimary: true },
-      { id: '7', name: 'Michael Brown' },
-      { id: '8', name: 'Laura Wilson' }
-    ],
-    capacity: 4,
-    expiresAt: '2025-04-05T00:00:00Z',
-    status: 'active',
-    lastPayment: '2025-03-05T00:00:00Z'
-  },
-  {
-    id: '4',
-    serviceName: 'YouTube Premium',
-    serviceLogo: '/assets/logos/youtube.svg',
-    serviceColor: '#FF0000',
-    plan: 'Family',
-    totalCost: 17.99,
-    splitCost: 3.60,
-    members: [
-      { id: '3', name: 'Chris Moore', isPrimary: true },
-      { id: '1', name: 'John Smith' },
-      { id: '9', name: 'Emily Clark' },
-      { id: '10', name: 'Ryan Lewis' },
-      { id: '11', name: 'Olivia Green' }
-    ],
-    capacity: 6,
-    expiresAt: '2025-03-22T00:00:00Z',
-    status: 'pending',
-    lastPayment: '2025-02-22T00:00:00Z'
-  },
-  {
-    id: '5',
-    serviceName: 'Adobe Creative Cloud',
-    serviceLogo: '/assets/logos/adobe.svg',
-    serviceColor: '#FF0000',
-    plan: 'Complete',
-    totalCost: 52.99,
-    splitCost: 17.66,
-    members: [
-      { id: '12', name: 'Jessica Hall', isPrimary: true },
-      { id: '1', name: 'John Smith' },
-      { id: '13', name: 'Daniel Taylor' }
-    ],
-    capacity: 3,
-    expiresAt: '2025-04-10T00:00:00Z',
-    status: 'active',
-    lastPayment: '2025-03-10T00:00:00Z'
-  }
-];
+import { poolService } from '../services/poolService';
+import { Pool } from '../types';
 
 // Filter options
 const filters = {
@@ -113,16 +16,74 @@ const filters = {
 };
 
 const PoolsPage: NextPage = () => {
+  const [pools, setPools] = useState<Pool[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [sortBy, setSortBy] = useState('Recently Updated');
-  const [showMyPools, setShowMyPools] = useState(true);
+  const [showMyPools, setShowMyPools] = useState(false);
+  
+  // Get user ID from session or local storage
+  const getCurrentUserId = (): string => {
+    // This would be replaced with actual auth logic
+    return localStorage.getItem('userId') || '1';
+  };
+  
+  // Fetch pools from the API
+  useEffect(() => {
+    const fetchPools = async () => {
+      try {
+        setLoading(true);
+        const data = await poolService.getAllPools();
+        setPools(data);
+      } catch (err) {
+        console.error('Error fetching pools:', err);
+        setError('Failed to load subscription pools. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPools();
+  }, []);
+  
+  // Handle joining a pool
+  const handleJoinPool = async (poolId: string) => {
+    try {
+      await poolService.joinPool(poolId);
+      // Refresh the pools list
+      const data = await poolService.getAllPools();
+      setPools(data);
+    } catch (err) {
+      console.error('Error joining pool:', err);
+      setError('Failed to join pool. Please try again later.');
+    }
+  };
+  
+  // Handle creating a new pool
+  const handleCreatePool = () => {
+    window.location.href = '/create-pool'; // Redirect to pool creation page
+  };
+  
+  // Handle leaving a pool
+  const handleLeavePool = async (poolId: string) => {
+    try {
+      await poolService.leavePool(poolId);
+      // Refresh the pools list
+      const data = await poolService.getAllPools();
+      setPools(data);
+    } catch (err) {
+      console.error('Error leaving pool:', err);
+      setError('Failed to leave pool. Please try again later.');
+    }
+  };
   
   // Filter and sort pools
-  const filteredPools = poolsData.filter(pool => {
+  const filteredPools = pools.filter(pool => {
     const matchesSearch = pool.serviceName.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'All' || pool.status === statusFilter.toLowerCase();
-    const matchesUserFilter = !showMyPools || pool.members.some(member => member.id === '1'); // '1' is the current user
+    const currentUserId = getCurrentUserId();
+    const matchesUserFilter = !showMyPools || pool.members.some(member => member.id === currentUserId);
     
     return matchesSearch && matchesStatus && matchesUserFilter;
   });
@@ -137,7 +98,7 @@ const PoolsPage: NextPage = () => {
       return new Date(a.expiresAt).getTime() - new Date(b.expiresAt).getTime();
     }
     // Default: Recently Updated
-    return new Date(b.lastPayment).getTime() - new Date(a.lastPayment).getTime();
+    return new Date(b.lastPayment || b.expiresAt).getTime() - new Date(a.lastPayment || a.expiresAt).getTime();
   });
   
   return (
@@ -152,7 +113,10 @@ const PoolsPage: NextPage = () => {
           <p className="text-gray-400">Manage your shared subscriptions</p>
         </div>
         
-        <button className="bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-md flex items-center justify-center transition duration-200">
+        <button 
+          className="bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-md flex items-center justify-center transition duration-200"
+          onClick={handleCreatePool}
+        >
           <Plus size={18} className="mr-2" />
           Create New Pool
         </button>
@@ -219,15 +183,63 @@ const PoolsPage: NextPage = () => {
         </div>
       </div>
       
+      {/* Loading State */}
+      {loading && (
+        <div className="bg-gray-800 rounded-xl p-8 text-center">
+          <div className="mx-auto w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mb-4 animate-pulse">
+            <Users size={24} className="text-gray-500" />
+          </div>
+          <h3 className="text-xl font-semibold mb-2">Loading pools...</h3>
+        </div>
+      )}
+      
+      {/* Error State */}
+      {error && (
+        <div className="bg-gray-800 rounded-xl p-8 text-center">
+          <div className="mx-auto w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mb-4">
+            <Users size={24} className="text-gray-500" />
+          </div>
+          <h3 className="text-xl font-semibold mb-2 text-red-400">Error</h3>
+          <p className="text-gray-400 mb-4">{error}</p>
+          <button 
+            className="bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-md transition duration-200"
+            onClick={() => {
+              setError(null);
+              setLoading(true);
+              poolService.getAllPools()
+                .then(data => {
+                  setPools(data);
+                  setLoading(false);
+                })
+                .catch(err => {
+                  console.error('Error retrying pools fetch:', err);
+                  setError('Failed to load subscription pools. Please try again later.');
+                  setLoading(false);
+                });
+            }}
+          >
+            Retry
+          </button>
+        </div>
+      )}
+      
       {/* Pools Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {sortedPools.map(pool => (
-          <PoolCard key={pool.id} pool={pool} />
-        ))}
-      </div>
+      {!loading && !error && sortedPools.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {sortedPools.map(pool => (
+            <PoolCard 
+              key={pool.id} 
+              pool={pool} 
+              onJoin={() => handleJoinPool(pool.id)}
+              onLeave={() => handleLeavePool(pool.id)}
+              currentUserId={getCurrentUserId()}
+            />
+          ))}
+        </div>
+      )}
       
       {/* Empty State */}
-      {sortedPools.length === 0 && (
+      {!loading && !error && sortedPools.length === 0 && (
         <div className="bg-gray-800 rounded-xl p-8 text-center">
           <div className="mx-auto w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mb-4">
             <Users size={24} className="text-gray-500" />
@@ -250,7 +262,10 @@ const PoolsPage: NextPage = () => {
               Clear Filters
             </button>
           ) : (
-            <button className="bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-md flex items-center justify-center transition duration-200 mx-auto">
+            <button 
+              className="bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-md flex items-center justify-center transition duration-200 mx-auto"
+              onClick={handleCreatePool}
+            >
               <Plus size={18} className="mr-2" />
               Create New Pool
             </button>
