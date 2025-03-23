@@ -62,7 +62,7 @@ const PoolsPage: NextPage = () => {
   
   // Handle creating a new pool
   const handleCreatePool = () => {
-    window.location.href = '/create-pool'; // Redirect to pool creation page
+    window.location.href = '/pools/create-pool'; // Redirect to pool creation page
   };
   
   // Handle leaving a pool
