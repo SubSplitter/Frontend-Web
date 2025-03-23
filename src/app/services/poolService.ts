@@ -31,9 +31,18 @@ interface CreatePoolData {
   costPerSlot: number;
 }
 
+interface CreatePoolData {
+  serviceId: string;
+  name: string;
+  encryptedCredentials: string;
+  slotsTotal: number;
+  costPerSlot: number;
+}
+
 class PoolService {
   private apiUrl: string;
   private serviceCache: Map<string, ServiceInfo>;
+  
 
   constructor() {
     this.apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
@@ -73,16 +82,78 @@ class PoolService {
     }
   }
 
+  async createPool(poolData: CreatePoolData): Promise<Pool> {
+    try {
+      // Instead of directly using getKindeServerSession, fetch the token from our API route
+      const tokenResponse = await fetch('/api/auth');
+      
+      if (!tokenResponse.ok) {
+        throw new Error('Failed to get authentication token');
+      }
+      
+      const { accessToken } = await tokenResponse.json();
+      
+      if (!accessToken) {
+        throw new Error('Authentication token not found');
+      }
+      
+      // Prepare the request payload without userId since backend will identify it
+      const payload = {
+        serviceId: poolData.serviceId,
+        name: poolData.name,
+        encryptedCredentials: poolData.encryptedCredentials,
+        slotsTotal: poolData.slotsTotal,
+        costPerSlot: poolData.costPerSlot.toString(), // API expects this as a string
+        isActive: true,
+        region: null
+      };
+      
+      // Make the API request with the Authorization header
+      const response = await fetch(`${this.apiUrl}/subscriptions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
+        },
+        body: JSON.stringify(payload),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+      
+      // Parse the response
+      const data = await response.json();
+      console.log("Create Pool Response:", data);
+      
+      // Transform the response to match your Pool interface
+      // Assuming the API returns the newly created pool
+      const pools = await this.transformPools([data]);
+      return pools[0];
+    } catch (error) {
+      console.error('Error creating pool:', error);
+      throw error;
+    }
+  }
+
   async joinPool(poolId: string): Promise<void> {
     try {
+      // Get authentication token first
+      const tokenResponse = await fetch('/api/auth');
+      
+      if (!tokenResponse.ok) {
+        throw new Error('Failed to get authentication token');
+      }
+      
+      const { accessToken } = await tokenResponse.json();
+
       const response = await fetch(`${this.apiUrl}/subscriptions/${poolId}/join`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: localStorage.getItem('userId') || '1'
-        }),
+          'Authorization': `Bearer ${accessToken}`
+        }
+        // No need to send userId in body since it will be extracted from token
       });
 
       if (!response.ok) {
@@ -96,14 +167,22 @@ class PoolService {
 
   async leavePool(poolId: string): Promise<void> {
     try {
+      // Get authentication token first
+      const tokenResponse = await fetch('/api/auth');
+      
+      if (!tokenResponse.ok) {
+        throw new Error('Failed to get authentication token');
+      }
+      
+      const { accessToken } = await tokenResponse.json();
+
       const response = await fetch(`${this.apiUrl}/subscriptions/${poolId}/leave`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: localStorage.getItem('userId') || '1'
-        }),
+          'Authorization': `Bearer ${accessToken}`
+        }
+        // No need to send userId in body since it will be extracted from token
       });
 
       if (!response.ok) {

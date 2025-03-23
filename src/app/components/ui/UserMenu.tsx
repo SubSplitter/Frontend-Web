@@ -2,10 +2,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { UserCircle, LogOut, Settings, CreditCard } from 'lucide-react';
+import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
 
 export default function UserMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const { user, logout } = useKindeBrowserClient();
   
   // Close menu when clicking outside
   useEffect(() => {
@@ -21,6 +23,18 @@ export default function UserMenu() {
     };
   }, [menuRef]);
 
+  // Get user initials for avatar
+  const getUserInitials = () => {
+    if (!user || !user.given_name) return "U";
+    
+    const names = [user.given_name, user.family_name].filter(Boolean);
+    return names.map(name => name?.[0] || "").join("");
+  };
+
+  const handleLogout = () => {
+    logout();
+  };
+
   return (
     <div className="relative" ref={menuRef}>
       <button
@@ -28,16 +42,28 @@ export default function UserMenu() {
         className="flex items-center space-x-2 focus:outline-none"
       >
         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white font-medium">
-          JS
+          {user?.picture ? (
+            <img 
+              src={user.picture} 
+              alt={user?.given_name || "User"} 
+              className="w-8 h-8 rounded-full"
+            />
+          ) : (
+            getUserInitials()
+          )}
         </div>
-        <span className="hidden md:block text-sm font-medium">John Smith</span>
+        <span className="hidden md:block text-sm font-medium">
+          {user?.given_name ? `${user.given_name} ${user.family_name || ''}` : 'Guest'}
+        </span>
       </button>
       
       {isOpen && (
         <div className="absolute right-0 mt-2 w-56 bg-gray-800 border border-gray-700 rounded-md shadow-lg py-1 z-10">
           <div className="px-4 py-3 border-b border-gray-700">
-            <p className="text-sm font-medium">John Smith</p>
-            <p className="text-xs text-gray-400 truncate">john.smith@example.com</p>
+            <p className="text-sm font-medium">
+              {user?.given_name ? `${user.given_name} ${user.family_name || ''}` : 'Guest'}
+            </p>
+            <p className="text-xs text-gray-400 truncate">{user?.email || ''}</p>
           </div>
           
           <Link href="/profile" passHref>
@@ -62,7 +88,10 @@ export default function UserMenu() {
           </Link>
           
           <div className="border-t border-gray-700 mt-1 pt-1">
-            <button className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 flex items-center">
+            <button 
+              onClick={handleLogout}
+              className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 flex items-center"
+            >
               <LogOut size={16} className="mr-2" />
               <span>Sign out</span>
             </button>
