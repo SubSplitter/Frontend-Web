@@ -50,13 +50,16 @@ const PoolsPage: NextPage = () => {
   // Handle joining a pool
   const handleJoinPool = async (poolId: string) => {
     try {
-      await poolService.joinPool(poolId);
-      // Refresh the pools list
+      // No need for direct API call here as it's now handled by the modal
+      // Just refresh the pools list after successful join
+      setLoading(true);
       const data = await poolService.getAllPools();
       setPools(data);
+      setLoading(false);
     } catch (err) {
-      console.error('Error joining pool:', err);
-      setError('Failed to join pool. Please try again later.');
+      console.error('Error refreshing pools:', err);
+      setError('Failed to refresh pool list. Please reload the page.');
+      setLoading(false);
     }
   };
   
@@ -233,6 +236,10 @@ const PoolsPage: NextPage = () => {
               onJoin={() => handleJoinPool(pool.id)}
               onLeave={() => handleLeavePool(pool.id)}
               currentUserId={getCurrentUserId()}
+              onClick={() => {
+                // Handle click to view pool details
+                window.location.href = `/pools/${pool.id}`;
+              }}
             />
           ))}
         </div>

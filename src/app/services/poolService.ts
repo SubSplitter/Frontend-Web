@@ -266,6 +266,7 @@ class PoolService {
         splitCost: parseFloat(apiPool.costPerSlot),
         members: [defaultMember],
         capacity: apiPool.slotsTotal,
+        slotsAvailable: apiPool.slotsAvailable,
         expiresAt: nextBillingDate.toISOString(),
         status: apiPool.isActive ? 'active' : 'expired',
         lastPayment: apiPool.updatedAt

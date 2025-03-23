@@ -16,6 +16,7 @@ export interface Member {
     splitCost: number;
     members: Member[];
     capacity: number;
+    slotsAvailable: number;
     expiresAt: string;
     status: 'active' | 'pending' | 'expired';
     lastPayment?: string;
