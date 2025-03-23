@@ -22,6 +22,14 @@ interface ServiceInfo {
   logoUrl: string;
   color: string;
 }
+interface CreatePoolData {
+  userId: string;
+  serviceId: string;
+  name: string;
+  encryptedCredentials: string;
+  slotsTotal: number;
+  costPerSlot: number;
+}
 
 class PoolService {
   private apiUrl: string;
@@ -31,6 +39,8 @@ class PoolService {
     this.apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
     this.serviceCache = new Map();
   }
+
+  
 
   async getAllPools(): Promise<Pool[]> {
     try {

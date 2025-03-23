@@ -257,7 +257,8 @@ const PoolsPage: NextPage = () => {
                 setSearchTerm('');
                 setStatusFilter('All');
                 setShowMyPools(true);
-              }}
+              }
+            }
             >
               Clear Filters
             </button>
