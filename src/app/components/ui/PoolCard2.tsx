@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import { Users } from 'lucide-react';
 import JoinPoolModal from '../forms/JoinPoolModal';
+import LeavePoolModal from '../forms/LeavePoolModal';
 
 interface Member {
   id: string;
@@ -31,6 +32,7 @@ interface PoolCardProps {
 
 export default function PoolCard({ pool, onClick, onJoin, onLeave, currentUserId }: PoolCardProps) {
   const [showJoinModal, setShowJoinModal] = useState(false);
+  const [showLeaveModal, setShowLeaveModal] = useState(false);
   
   const remainingSlots = pool.slotsAvailable;
   const formattedExpiryDate = new Date(pool.expiresAt).toLocaleDateString();
@@ -38,7 +40,9 @@ export default function PoolCard({ pool, onClick, onJoin, onLeave, currentUserId
   const savingsPercentage = ((savings / pool.totalCost) * 100).toFixed(0);
   
   // Check if the current user is already a member
-  const isUserMember = pool.members.some(member => member.id === currentUserId);
+  const isUserMember = pool.isUserMember || pool.members.some(member => member.id === currentUserId);
+
+  console.log("Pool:", pool.serviceName, "- isUserMember:", isUserMember);
   
   // Handle missing images gracefully
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
@@ -50,7 +54,7 @@ export default function PoolCard({ pool, onClick, onJoin, onLeave, currentUserId
   // Handle leave action
   const handleLeave = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (onLeave) onLeave();
+    setShowLeaveModal(true);
   };
   
   return (
@@ -112,14 +116,14 @@ export default function PoolCard({ pool, onClick, onJoin, onLeave, currentUserId
                 Members
               </div>
               <div className="text-sm bg-gray-700 px-2 py-1 rounded-full">
-              {pool.capacity - pool.slotsAvailable}/{pool.capacity}
+                {pool.capacity - pool.slotsAvailable}/{pool.capacity}
               </div>
             </div>
             <div className="w-full bg-gray-700 rounded-full h-1.5">
-            <div 
-  className="bg-purple-600 h-1.5 rounded-full" 
-  style={{ width: `${((pool.capacity - pool.slotsAvailable)/pool.capacity)*100}%` }}
-></div>
+              <div 
+                className="bg-purple-600 h-1.5 rounded-full" 
+                style={{ width: `${((pool.capacity - pool.slotsAvailable)/pool.capacity)*100}%` }}
+              ></div>
             </div>
           </div>
           
@@ -162,6 +166,17 @@ export default function PoolCard({ pool, onClick, onJoin, onLeave, currentUserId
         onClose={() => setShowJoinModal(false)}
         onSuccess={() => {
           if (onJoin) onJoin();
+        }}
+      />
+
+      {/* Leave Pool Modal */}
+      <LeavePoolModal
+        poolId={pool.id}
+        poolName={pool.serviceName}
+        isOpen={showLeaveModal}
+        onClose={() => setShowLeaveModal(false)}
+        onSuccess={() => {
+          if (onLeave) onLeave();
         }}
       />
     </>

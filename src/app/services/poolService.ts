@@ -16,19 +16,27 @@ interface ApiPool {
   isActive: boolean;
 }
 
+interface JoinedPool {
+  poolId: string;
+  name: string;
+  serviceId: string;
+  slotsTotal: number;
+  slotsAvailable: number;
+  costPerSlot: string;
+  membershipStatus: {
+    paymentStatus: string;
+    accessStatus: string;
+    joinedAt: string;
+  };
+  serviceName?: string;
+  serviceLogoUrl?: string;
+}
+
 interface ServiceInfo {
   id: string;
   name: string;
   logoUrl: string;
   color: string;
-}
-interface CreatePoolData {
-  userId: string;
-  serviceId: string;
-  name: string;
-  encryptedCredentials: string;
-  slotsTotal: number;
-  costPerSlot: number;
 }
 
 interface CreatePoolData {
@@ -43,13 +51,42 @@ class PoolService {
   private apiUrl: string;
   private serviceCache: Map<string, ServiceInfo>;
   
-
   constructor() {
     this.apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
     this.serviceCache = new Map();
   }
 
-  
+  async getUserPools(): Promise<JoinedPool[]> {
+    try {
+      // Get authentication token first
+      const tokenResponse = await fetch('/api/auth');
+      
+      if (!tokenResponse.ok) {
+        throw new Error('Failed to get authentication token');
+      }
+      
+      const { accessToken } = await tokenResponse.json();
+      
+      // Make the API request to get current user's pool memberships
+      const response = await fetch(`${this.apiUrl}/pool-members/current-user`, {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log("User Pools Data:", data);
+      
+      return data;
+    } catch (error) {
+      console.error('Error fetching user pools:', error);
+      return [];
+    }
+  }
 
   async getAllPools(): Promise<Pool[]> {
     try {
@@ -157,6 +194,10 @@ class PoolService {
       });
 
       if (!response.ok) {
+        const errorData = await response.json();
+        if (errorData.message && errorData.message.includes('already a member')) {
+          throw new Error('You have already joined this subscription pool');
+        }
         throw new Error(`API error: ${response.status}`);
       }
     } catch (error) {

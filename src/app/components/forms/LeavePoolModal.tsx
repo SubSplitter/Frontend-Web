@@ -1,48 +1,42 @@
 import React, { useState } from 'react';
-import { poolService } from '../../services/poolService';
-import { Loader2, AlertTriangle, Check, X, Info } from 'lucide-react';
+import { Loader2, AlertTriangle, Check, X } from 'lucide-react';
 
-interface JoinPoolModalProps {
+interface LeavePoolModalProps {
   poolId: string;
   poolName: string;
-  costPerMonth: number;
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-export default function JoinPoolModal({
+export default function LeavePoolModal({
   poolId,
   poolName,
-  costPerMonth,
   isOpen,
   onClose,
   onSuccess
-}: JoinPoolModalProps) {
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error' | 'already-joined'>('idle');
+}: LeavePoolModalProps) {
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState<string>('');
 
-  // Handle joining a pool
-  const handleJoinPool = async () => {
+  // Handle leaving a pool
+  const handleLeavePool = async () => {
     try {
       setStatus('loading');
-      await poolService.joinPool(poolId);
+      // We'll use the poolService to leave the pool
+      // This import and function call will be handled in the component where this modal is used
+      // await poolService.leavePool(poolId);
+      onSuccess(); // This will trigger the leave action in the parent component
       setStatus('success');
+      
       // Wait a moment before closing the modal
       setTimeout(() => {
-        onSuccess();
         onClose();
       }, 1500);
     } catch (error: any) {
-      console.error('Error joining pool:', error);
-      
-      // Check if it's the specific "already a member" error message
-      if (error.message && error.message.toLowerCase().includes('already a member')) {
-        setStatus('already-joined');
-      } else {
-        setErrorMessage(error.message || 'Failed to join pool. Please try again later.');
-        setStatus('error');
-      }
+      console.error('Error leaving pool:', error);
+      setErrorMessage(error.message || 'Failed to leave pool. Please try again later.');
+      setStatus('error');
     }
   };
 
@@ -53,9 +47,7 @@ export default function JoinPoolModal({
       <div className="bg-gray-800 rounded-xl max-w-md w-full overflow-hidden shadow-xl">
         {/* Header with close button */}
         <div className="flex justify-between items-center p-4 border-b border-gray-700">
-          <h3 className="text-lg font-semibold">
-            {status === 'already-joined' ? 'Already a Member' : 'Join Subscription Pool'}
-          </h3>
+          <h3 className="text-lg font-semibold">Leave Subscription Pool</h3>
           <button 
             onClick={onClose}
             className="text-gray-400 hover:text-white"
@@ -69,17 +61,17 @@ export default function JoinPoolModal({
           {status === 'idle' && (
             <>
               <p className="mb-4">
-                You're about to join the <span className="font-medium">{poolName}</span> subscription pool.
+                Are you sure you want to leave the <span className="font-medium">{poolName}</span> subscription pool?
               </p>
               
               <div className="bg-gray-900 rounded-lg p-4 mb-6">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-gray-400">Your monthly cost:</span>
-                  <span className="text-lg font-bold text-green-400">${costPerMonth.toFixed(2)}</span>
-                </div>
-                
                 <div className="text-sm text-gray-400">
-                  You'll be charged when the subscription renews. You can leave the pool anytime before the renewal date.
+                  <p>When you leave a pool:</p>
+                  <ul className="list-disc pl-5 mt-2 space-y-1">
+                    <li>You'll lose access to the subscription immediately</li>
+                    <li>You won't be charged in future billing cycles</li>
+                    <li>No refunds are provided for the current billing period</li>
+                  </ul>
                 </div>
               </div>
               
@@ -91,10 +83,10 @@ export default function JoinPoolModal({
                   Cancel
                 </button>
                 <button 
-                  onClick={handleJoinPool}
-                  className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors"
+                  onClick={handleLeavePool}
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
                 >
-                  Join Pool
+                  Leave Pool
                 </button>
               </div>
             </>
@@ -103,7 +95,7 @@ export default function JoinPoolModal({
           {status === 'loading' && (
             <div className="text-center py-6">
               <Loader2 size={36} className="animate-spin mx-auto text-purple-500 mb-4" />
-              <p>Joining pool...</p>
+              <p>Processing your request...</p>
               <p className="text-sm text-gray-400 mt-2">This will only take a moment</p>
             </div>
           )}
@@ -113,30 +105,8 @@ export default function JoinPoolModal({
               <div className="w-16 h-16 bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Check size={32} className="text-green-400" />
               </div>
-              <h4 className="text-xl font-semibold mb-2">Successfully Joined!</h4>
-              <p className="text-gray-400">You are now a member of the {poolName} pool</p>
-            </div>
-          )}
-          
-          {status === 'already-joined' && (
-            <div className="text-center py-6">
-              <div className="w-16 h-16 bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Info size={32} className="text-blue-400" />
-              </div>
-              <h4 className="text-xl font-semibold mb-2 text-blue-400">Already a Member</h4>
-              <p className="text-gray-400 mb-4">
-                You're already a member of this subscription pool.
-                <br />
-                <span className="block mt-2">Check your active memberships to access {poolName}.</span>
-              </p>
-              <div className="flex justify-center">
-                <button 
-                  onClick={onClose}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
-                >
-                  Got It
-                </button>
-              </div>
+              <h4 className="text-xl font-semibold mb-2">Successfully Left Pool</h4>
+              <p className="text-gray-400">You've been removed from the {poolName} pool</p>
             </div>
           )}
           
@@ -159,7 +129,7 @@ export default function JoinPoolModal({
                     setStatus('idle');
                     setErrorMessage('');
                   }}
-                  className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors"
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
                 >
                   Try Again
                 </button>

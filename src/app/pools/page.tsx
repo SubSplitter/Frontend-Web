@@ -24,11 +24,6 @@ const PoolsPage: NextPage = () => {
   const [sortBy, setSortBy] = useState('Recently Updated');
   const [showMyPools, setShowMyPools] = useState(false);
   
-  // Get user ID from session or local storage
-  const getCurrentUserId = (): string => {
-    // This would be replaced with actual auth logic
-    return localStorage.getItem('userId') || '1';
-  };
   
   // Fetch pools from the API
   useEffect(() => {
@@ -47,6 +42,7 @@ const PoolsPage: NextPage = () => {
     fetchPools();
   }, []);
   
+
   // Handle joining a pool
   const handleJoinPool = async (poolId: string) => {
     try {
@@ -69,18 +65,29 @@ const PoolsPage: NextPage = () => {
   };
   
   // Handle leaving a pool
-  const handleLeavePool = async (poolId: string) => {
-    try {
-      await poolService.leavePool(poolId);
-      // Refresh the pools list
-      const data = await poolService.getAllPools();
-      setPools(data);
-    } catch (err) {
-      console.error('Error leaving pool:', err);
-      setError('Failed to leave pool. Please try again later.');
-    }
-  };
-  
+  // Handle leaving a pool
+  // Handle leaving a pool
+const handleLeavePool = async (poolId: string) => {
+  try {
+    setLoading(true);
+    await poolService.leavePool(poolId);
+    
+    // Refresh the pools list
+    const data = await poolService.getAllPools();
+    setPools(data);
+    setLoading(false);
+  } catch (err) {
+    console.error('Error leaving pool:', err);
+    setError('Failed to leave pool. Please try again later.');
+    setLoading(false);
+  }
+};
+const getCurrentUserId = () => {
+  // This should match however you're identifying the current user in the backend
+  // For development purposes, we'll use a simple approach
+  return '1'; // In production, get this from your auth context/service
+};
+
   // Filter and sort pools
   const filteredPools = pools.filter(pool => {
     const matchesSearch = pool.serviceName.toLowerCase().includes(searchTerm.toLowerCase());

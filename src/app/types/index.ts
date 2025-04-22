@@ -20,4 +20,5 @@ export interface Member {
     expiresAt: string;
     status: 'active' | 'pending' | 'expired';
     lastPayment?: string;
+    isUserMember?: boolean;
   }
