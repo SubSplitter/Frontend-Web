@@ -1,0 +1,14 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/auth/route": "app/api/auth/route.js",
+  "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/api/auth/[kindeAuth]/route": "app/api/auth/[kindeAuth]/route.js",
+  "/dashboard/page": "app/dashboard/page.js",
+  "/page": "app/page.js",
+  "/pools/[service]/page": "app/pools/[service]/page.js",
+  "/pools/create-pool/page": "app/pools/create-pool/page.js",
+  "/pools/page": "app/pools/page.js",
+  "/settings/page": "app/settings/page.js",
+  "/profile/page": "app/profile/page.js",
+  "/subscriptions/page": "app/subscriptions/page.js"
+}
