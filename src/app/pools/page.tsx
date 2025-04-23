@@ -1,6 +1,6 @@
 'use client'
 // pages/pools.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { NextPage } from 'next';
 import Head from 'next/head';
 import DashboardLayout from '../components/layout/DashboardLayout';
@@ -8,7 +8,7 @@ import PoolCard from '../components/ui/PoolCard2';
 import { Plus, Search, Filter, ArrowDown, Settings, Users } from 'lucide-react';
 import { poolService } from '../services/poolService';
 import { Pool } from '../types';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 // Filter options
 const filters = {
@@ -16,10 +16,11 @@ const filters = {
   sortBy: ['Recently Updated', 'Price: Low to High', 'Price: High to Low', 'Expiring Soon']
 };
 
-const PoolsPage: NextPage = () => {
+// Client Component that uses useSearchParams
+function PoolsContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  // const initialService = searchParams.get('service') || '';
+  
   const [pools, setPools] = useState<Pool[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -87,28 +88,27 @@ const PoolsPage: NextPage = () => {
   };
   
   // Handle leaving a pool
-  // Handle leaving a pool
-  // Handle leaving a pool
-const handleLeavePool = async (poolId: string) => {
-  try {
-    setLoading(true);
-    await poolService.leavePool(poolId);
-    
-    // Refresh the pools list
-    const data = await poolService.getAllPools();
-    setPools(data);
-    setLoading(false);
-  } catch (err) {
-    console.error('Error leaving pool:', err);
-    setError('Failed to leave pool. Please try again later.');
-    setLoading(false);
-  }
-};
-const getCurrentUserId = () => {
-  // This should match however you're identifying the current user in the backend
-  // For development purposes, we'll use a simple approach
-  return '1'; // In production, get this from your auth context/service
-};
+  const handleLeavePool = async (poolId: string) => {
+    try {
+      setLoading(true);
+      await poolService.leavePool(poolId);
+      
+      // Refresh the pools list
+      const data = await poolService.getAllPools();
+      setPools(data);
+      setLoading(false);
+    } catch (err) {
+      console.error('Error leaving pool:', err);
+      setError('Failed to leave pool. Please try again later.');
+      setLoading(false);
+    }
+  };
+  
+  const getCurrentUserId = () => {
+    // This should match however you're identifying the current user in the backend
+    // For development purposes, we'll use a simple approach
+    return '1'; // In production, get this from your auth context/service
+  };
 
   // Filter and sort pools
   const filteredPools = pools.filter(pool => {
@@ -134,11 +134,7 @@ const getCurrentUserId = () => {
   });
   
   return (
-    <DashboardLayout>
-      <Head>
-        <title>Subscription Pools | SubSplitter</title>
-      </Head>
-      
+    <>
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold mb-1">Subscription Pools</h1>
@@ -169,32 +165,6 @@ const getCurrentUserId = () => {
           </div>
           
           <div className="flex flex-col sm:flex-row gap-4">
-            {/* <div className="flex items-center space-x-2">
-              <input 
-                type="checkbox" 
-                id="myPoolsOnly" 
-                className="w-4 h-4 rounded border-gray-600 text-purple-600 focus:ring-purple-500 focus:ring-offset-gray-700"
-                checked={showMyPools}
-                onChange={() => setShowMyPools(!showMyPools)}
-              />
-               <label htmlFor="myPoolsOnly" className="text-sm">My pools only</label>
-            </div> */}
-            
-            {/* <div className="relative">
-              <select
-                className="appearance-none bg-gray-700 text-gray-200 rounded-md py-2 pl-10 pr-8 focus:outline-none focus:ring-1 focus:ring-purple-500"
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-              >
-                {filters.status.map(status => (
-                  <option key={status} value={status}>{status}</option>
-                ))}
-              </select>
-              <Filter size={18} className="absolute left-3 top-2.5 text-gray-400" />
-              <div className="absolute right-2 top-2.5 pointer-events-none text-gray-400">
-                <ArrowDown size={16} />
-              </div>
-            </div> */}
             <button 
                className="bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-md transition duration-200"
                onClick={handleClearFilters}
@@ -315,6 +285,27 @@ const getCurrentUserId = () => {
           )}
         </div>
       )}
+    </>
+  );
+}
+
+const PoolsPage: NextPage = () => {
+  return (
+    <DashboardLayout>
+      <Head>
+        <title>Subscription Pools | SubSplitter</title>
+      </Head>
+      
+      <Suspense fallback={
+        <div className="bg-gray-800 rounded-xl p-8 text-center">
+          <div className="mx-auto w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mb-4 animate-pulse">
+            <Users size={24} className="text-gray-500" />
+          </div>
+          <h3 className="text-xl font-semibold mb-2">Loading pools...</h3>
+        </div>
+      }>
+        <PoolsContent />
+      </Suspense>
     </DashboardLayout>
   );
 };
