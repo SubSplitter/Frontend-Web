@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
+  output: 'server',
   // trailingSlash: true,
   eslint: {
     ignoreDuringBuilds: true,
