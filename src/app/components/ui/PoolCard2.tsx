@@ -23,6 +23,7 @@ interface PoolCardProps {
     slotsAvailable: number;
     expiresAt: string;
     status?: 'active' | 'pending' | 'expired';
+    isUserMember?: boolean;
   };
   onClick?: () => void;
   onJoin?: () => void;

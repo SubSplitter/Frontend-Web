@@ -81,10 +81,64 @@ class PoolService {
       const data = await response.json();
       console.log("User Pools Data:", data);
       
-      return data;
+      // Transform the data to match JoinedPool interface
+      return data.map((pool: any) => ({
+        poolId: pool.poolId,
+        name: pool.name || 'Subscription Pool',
+        serviceId: pool.serviceId,
+        slotsTotal: pool.slotsTotal,
+        slotsAvailable: pool.slotsAvailable,
+        costPerSlot: pool.costPerSlot,
+        membershipStatus: {
+          // Use default values if not provided by API
+          paymentStatus: 'paid',
+          accessStatus: pool.isActive ? 'active' : 'inactive',
+          joinedAt: pool.createdAt
+        }
+      }));
     } catch (error) {
       console.error('Error fetching user pools:', error);
       return [];
+    }
+  }
+
+  // Fetch service information from the API
+  async getServiceInfo(serviceId: string): Promise<ServiceInfo> {
+    // Check if we have this service in cache
+    if (this.serviceCache.has(serviceId)) {
+      return this.serviceCache.get(serviceId)!;
+    }
+    
+    try {
+      const response = await fetch(`${this.apiUrl}/subscription-services/${serviceId}`);
+      
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+      
+      const serviceData = await response.json();
+      
+      // Create service info object
+      const serviceInfo: ServiceInfo = {
+        id: serviceId,
+        name: serviceData.name || 'Subscription Service',
+        logoUrl: serviceData.logoUrl || '/assets/logos/default.svg',
+        color: serviceData.color || '#6366f1'
+      };
+      
+      // Cache the service info
+      this.serviceCache.set(serviceId, serviceInfo);
+      
+      return serviceInfo;
+    } catch (error) {
+      console.error(`Error fetching service ${serviceId}:`, error);
+      // Return default service info in case of error
+      return {
+        id: serviceId,
+        name: 'Subscription Service',
+        logoUrl: '/assets/logos/default.svg',
+        color: '#6366f1'
+      };
     }
   }
 
@@ -96,10 +150,6 @@ class PoolService {
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`);
       }
-      
-      // Clone the response before logging
-      const responseToLog = response.clone();
-      console.log("API Response:", responseToLog);
       
       // Parse the response as JSON
       const data = await response.json();
@@ -232,46 +282,6 @@ class PoolService {
     } catch (error) {
       console.error('Error leaving pool:', error);
       throw error;
-    }
-  }
-
-  // Fetch service information from the API
-  private async getServiceInfo(serviceId: string): Promise<ServiceInfo> {
-    // Check if we have this service in cache
-    if (this.serviceCache.has(serviceId)) {
-      return this.serviceCache.get(serviceId)!;
-    }
-    
-    try {
-      const response = await fetch(`${this.apiUrl}/subscription-services/${serviceId}`);
-      
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
-      }
-      
-      const serviceData = await response.json();
-      
-      // Create service info object
-      const serviceInfo: ServiceInfo = {
-        id: serviceId,
-        name: serviceData.name || 'Subscription Service',
-        logoUrl: serviceData.logoUrl || '/assets/logos/default.svg',
-        color: serviceData.color || '#6366f1'
-      };
-      
-      // Cache the service info
-      this.serviceCache.set(serviceId, serviceInfo);
-      
-      return serviceInfo;
-    } catch (error) {
-      console.error(`Error fetching service ${serviceId}:`, error);
-      // Return default service info in case of error
-      return {
-        id: serviceId,
-        name: 'Subscription Service',
-        logoUrl: '/assets/logos/default.svg',
-        color: '#6366f1'
-      };
     }
   }
 

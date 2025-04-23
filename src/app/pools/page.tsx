@@ -8,6 +8,7 @@ import PoolCard from '../components/ui/PoolCard2';
 import { Plus, Search, Filter, ArrowDown, Settings, Users } from 'lucide-react';
 import { poolService } from '../services/poolService';
 import { Pool } from '../types';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 // Filter options
 const filters = {
@@ -16,6 +17,9 @@ const filters = {
 };
 
 const PoolsPage: NextPage = () => {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  // const initialService = searchParams.get('service') || '';
   const [pools, setPools] = useState<Pool[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +28,25 @@ const PoolsPage: NextPage = () => {
   const [sortBy, setSortBy] = useState('Recently Updated');
   const [showMyPools, setShowMyPools] = useState(false);
   
-  
+  // Check for service name in URL on page load
+  useEffect(() => {
+    const serviceParam = searchParams.get('service');
+    if (serviceParam) {
+      setSearchTerm(serviceParam);
+    }
+  }, [searchParams]);
+
+  const handleClearFilters = () => {
+    // Clear state filters
+    setSearchTerm('');
+    setStatusFilter('All');
+    setShowMyPools(false);
+    
+    // Remove query parameters from URL
+    // This creates a new URL without the service parameter
+    const currentPath = window.location.pathname;
+    router.push(currentPath);
+  };
   // Fetch pools from the API
   useEffect(() => {
     const fetchPools = async () => {
@@ -147,7 +169,7 @@ const getCurrentUserId = () => {
           </div>
           
           <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex items-center space-x-2">
+            {/* <div className="flex items-center space-x-2">
               <input 
                 type="checkbox" 
                 id="myPoolsOnly" 
@@ -155,10 +177,10 @@ const getCurrentUserId = () => {
                 checked={showMyPools}
                 onChange={() => setShowMyPools(!showMyPools)}
               />
-              <label htmlFor="myPoolsOnly" className="text-sm">My pools only</label>
-            </div>
+               <label htmlFor="myPoolsOnly" className="text-sm">My pools only</label>
+            </div> */}
             
-            <div className="relative">
+            {/* <div className="relative">
               <select
                 className="appearance-none bg-gray-700 text-gray-200 rounded-md py-2 pl-10 pr-8 focus:outline-none focus:ring-1 focus:ring-purple-500"
                 value={statusFilter}
@@ -172,7 +194,13 @@ const getCurrentUserId = () => {
               <div className="absolute right-2 top-2.5 pointer-events-none text-gray-400">
                 <ArrowDown size={16} />
               </div>
-            </div>
+            </div> */}
+            <button 
+               className="bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-md transition duration-200"
+               onClick={handleClearFilters}
+              >
+               Clear Filters
+              </button>
             
             <div className="relative">
               <select

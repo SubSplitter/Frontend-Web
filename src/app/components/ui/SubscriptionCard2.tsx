@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Plus } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 interface SubscriptionCardProps {
   service: {
@@ -17,6 +18,7 @@ interface SubscriptionCardProps {
 }
 
 export default function SubscriptionCard({ service, onClick }: SubscriptionCardProps) {
+  const router = useRouter();
   const [isHovering, setIsHovering] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
   
@@ -36,6 +38,7 @@ export default function SubscriptionCard({ service, onClick }: SubscriptionCardP
     }
     return 85;
   };
+
   useEffect(() => {
     if (isHovering) {
       const timer = setTimeout(() => setIsFlipped(true), 100);
@@ -46,29 +49,35 @@ export default function SubscriptionCard({ service, onClick }: SubscriptionCardP
     }
   }, [isHovering]);
   
+  // Handle explore pools button click
+  const handleExplorePoolsClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent triggering the parent onClick
+    router.push(`/pools?service=${encodeURIComponent(service.name)}`);
+  };
+  
   return (
     <div 
-    className={`
-      aspect-square w-full perspective-1000 group cursor-pointer
-      transition-transform duration-300 
-      ${isHovering ? 'scale-[1]' : ''}
-    `}
-    onMouseEnter={() => setIsHovering(true)}
-    onMouseLeave={() => setIsHovering(false)}
-    onClick={onClick}
-  >
+      className={`
+        aspect-square w-full perspective-1000 group cursor-pointer
+        transition-transform duration-300 
+        ${isHovering ? 'scale-[1]' : ''}
+      `}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+      onClick={onClick}
+    >
       <div className={`relative w-full h-full transition-transform duration-500 transform-style-3d ${isFlipped ? 'rotate-y-180' : ''}`}>
         {/* Front of card - Full Logo */}
         <div 
-  className="absolute w-full h-full backface-hidden rounded-xl overflow-hidden transition-all duration-300 shadow-md" 
-  style={{ 
-    background: 'linear-gradient(to bottom, #1a1f2e, #131722)',
-    borderTop: `3px solid ${service.color}`,
-    borderLeft: `1px solid ${service.color}30`,
-    borderRight: `1px solid ${service.color}30`,
-    boxShadow: isHovering ? `0 0 15px ${service.color}20` : 'none',
-  }}
->
+          className="absolute w-full h-full backface-hidden rounded-xl overflow-hidden transition-all duration-300 shadow-md" 
+          style={{ 
+            background: 'linear-gradient(to bottom, #1a1f2e, #131722)',
+            borderTop: `3px solid ${service.color}`,
+            borderLeft: `1px solid ${service.color}30`,
+            borderRight: `1px solid ${service.color}30`,
+            boxShadow: isHovering ? `0 0 15px ${service.color}20` : 'none',
+          }}
+        >
           {/* Logo fills entire card */}
           <div className="flex flex-col items-center justify-center h-full relative">
             {/* Large logo as background */}
@@ -90,23 +99,21 @@ export default function SubscriptionCard({ service, onClick }: SubscriptionCardP
             {/* Service name at bottom */}
             <div className="absolute bottom-0 left-0 right-0 p-4 text-center">
               <h3 className="text-xl font-bold text-white mb-1">{service.name}</h3>
-              {/* <div className="text-purple-400 text-xs font-medium">Hover to see details</div> */}
             </div>
           </div>
         </div>
         
         {/* Back of card - Compact layout */}
-       {/* Back of card - Compact layout */}
-<div 
-  className="absolute w-full h-full backface-hidden rounded-xl overflow-hidden shadow-md rotate-y-180" 
-  style={{ 
-    background: 'linear-gradient(to bottom, #1a1f2e, #131722)',
-    borderTop: `3px solid ${service.color}`,
-    borderLeft: `1px solid ${service.color}30`,
-    borderRight: `1px solid ${service.color}30`,
-    boxShadow: isHovering ? `0 0 15px ${service.color}20` : 'none',
-  }}
->
+        <div 
+          className="absolute w-full h-full backface-hidden rounded-xl overflow-hidden shadow-md rotate-y-180" 
+          style={{ 
+            background: 'linear-gradient(to bottom, #1a1f2e, #131722)',
+            borderTop: `3px solid ${service.color}`,
+            borderLeft: `1px solid ${service.color}30`,
+            borderRight: `1px solid ${service.color}30`,
+            boxShadow: isHovering ? `0 0 15px ${service.color}20` : 'none',
+          }}
+        >
           <div className="flex flex-col h-full justify-between">
             {/* Top section with service info */}
             <div>
@@ -160,9 +167,12 @@ export default function SubscriptionCard({ service, onClick }: SubscriptionCardP
             
             {/* Button - always at bottom */}
             <div className="px-3 pb-3 pt-2 mt-auto">
-              <button className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white py-2 px-3 rounded-md flex items-center justify-center transition duration-200 text-sm">
+              <button 
+                className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white py-2 px-3 rounded-md flex items-center justify-center transition duration-200 text-sm"
+                onClick={handleExplorePoolsClick}
+              >
                 <Plus size={14} className="mr-1" />
-                Join Pool
+                Explore Pool
               </button>
             </div>
           </div>

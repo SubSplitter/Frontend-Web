@@ -32,98 +32,98 @@ interface CardService {
   category?: string;
   activePools?: number;
 }
-const services = [
-  {
-    id: '1',
-    name: 'Netflix',
-    logo: '/assets/logos/netflix-icon.svg',
-    price: 15.99,
-    description: 'Premium streaming service with movies, TV shows, and more.',
-    color: '#E50914',
-    category: 'Entertainment',
-    activePools: 8
-  },
-  {
-    id: '2',
-    name: 'Spotify',
-    logo: '/assets/logos/spotify.svg',
-    price: 9.99,
-    description: 'Music streaming with millions of songs and podcasts.',
-    color: '#1DB954',
-    category: 'Music',
-    activePools: 12
-  },
-  {
-    id: '3',
-    name: 'Disney+',
-    logo: '/assets/logos/disney-plus.svg',
-    price: 8.99,
-    description: 'Stream Disney, Marvel, Star Wars, and more.',
-    color: '#0063E5',
-    category: 'Entertainment',
-    activePools: 6
-  },
-  {
-    id: '4',
-    name: 'HBO Max',
-    logo: '/assets/logos/hbo-max.svg',
-    price: 14.99,
-    description: 'Streaming platform for HBO content, movies, and exclusives.',
-    color: '#5822B4',
-    category: 'Entertainment',
-    activePools: 5
-  },
-  {
-    id: '5',
-    name: 'YouTube Premium',
-    logo: '/assets/logos/youtube-icon-5.svg',
-    price: 11.99,
-    description: 'Ad-free videos, background play, and YouTube Music.',
-    color: '#000000',
-    category: 'Entertainment',
-    activePools: 7
-  },
-  {
-    id: '6',
-    name: 'Amazon Prime',
-    logo: '/assets/logos/amazon-prime.svg',
-    price: 14.99,
-    description: 'Prime Video, free shipping, and more Amazon benefits.',
-    color: '#00A8E1',
-    category: 'Shopping & Entertainment',
-    activePools: 4
-  },
-  {
-    id: '7',
-    name: 'Apple TV+',
-    logo: '/assets/logos/apple-tv.svg',
-    price: 6.99,
-    description: 'Original shows and movies from Apple.',
-    color: '#000000',
-    category: 'Entertainment',
-    activePools: 3
-  },
-  {
-    id: '8',
-    name: 'Apple Music',
-    logo: '/assets/logos/apple-music-3.svg',
-    price: 9.99,
-    description: 'Music streaming service by Apple.',
-    color: '#FA243C',
-    category: 'Music',
-    activePools: 6
-  },
-  {
-    id: '9',
-    name: 'Adobe Creative Cloud',
-    logo: '/assets/logos/adobe-2.svg',
-    price: 52.99,
-    description: 'Complete suite of Adobe creative apps and services.',
-    color: '#FF0000',
-    category: 'Productivity',
-    activePools: 10
-  }
-];
+// const services = [
+//   {
+//     id: '1',
+//     name: 'Netflix',
+//     logo: '/assets/logos/netflix-icon.svg',
+//     price: 15.99,
+//     description: 'Premium streaming service with movies, TV shows, and more.',
+//     color: '#E50914',
+//     category: 'Entertainment',
+//     activePools: 8
+//   },
+//   {
+//     id: '2',
+//     name: 'Spotify',
+//     logo: '/assets/logos/spotify.svg',
+//     price: 9.99,
+//     description: 'Music streaming with millions of songs and podcasts.',
+//     color: '#1DB954',
+//     category: 'Music',
+//     activePools: 12
+//   },
+//   {
+//     id: '3',
+//     name: 'Disney+',
+//     logo: '/assets/logos/disney-plus.svg',
+//     price: 8.99,
+//     description: 'Stream Disney, Marvel, Star Wars, and more.',
+//     color: '#0063E5',
+//     category: 'Entertainment',
+//     activePools: 6
+//   },
+//   {
+//     id: '4',
+//     name: 'HBO Max',
+//     logo: '/assets/logos/hbo-max.svg',
+//     price: 14.99,
+//     description: 'Streaming platform for HBO content, movies, and exclusives.',
+//     color: '#5822B4',
+//     category: 'Entertainment',
+//     activePools: 5
+//   },
+//   {
+//     id: '5',
+//     name: 'YouTube Premium',
+//     logo: '/assets/logos/youtube-icon-5.svg',
+//     price: 11.99,
+//     description: 'Ad-free videos, background play, and YouTube Music.',
+//     color: '#000000',
+//     category: 'Entertainment',
+//     activePools: 7
+//   },
+//   {
+//     id: '6',
+//     name: 'Amazon Prime',
+//     logo: '/assets/logos/amazon-prime.svg',
+//     price: 14.99,
+//     description: 'Prime Video, free shipping, and more Amazon benefits.',
+//     color: '#00A8E1',
+//     category: 'Shopping & Entertainment',
+//     activePools: 4
+//   },
+//   {
+//     id: '7',
+//     name: 'Apple TV+',
+//     logo: '/assets/logos/apple-tv.svg',
+//     price: 6.99,
+//     description: 'Original shows and movies from Apple.',
+//     color: '#000000',
+//     category: 'Entertainment',
+//     activePools: 3
+//   },
+//   {
+//     id: '8',
+//     name: 'Apple Music',
+//     logo: '/assets/logos/apple-music-3.svg',
+//     price: 9.99,
+//     description: 'Music streaming service by Apple.',
+//     color: '#FA243C',
+//     category: 'Music',
+//     activePools: 6
+//   },
+//   {
+//     id: '9',
+//     name: 'Adobe Creative Cloud',
+//     logo: '/assets/logos/adobe-2.svg',
+//     price: 52.99,
+//     description: 'Complete suite of Adobe creative apps and services.',
+//     color: '#FF0000',
+//     category: 'Productivity',
+//     activePools: 10
+//   }
+// ];
 
 const SubscriptionsPage: NextPage = () => {
   const [services, setServices] = useState<CardService[]>([]);

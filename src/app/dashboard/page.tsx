@@ -1,13 +1,13 @@
 // pages/dashboard.tsx
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { NextPage } from 'next';
 import Head from 'next/head';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import StatsCard from '../components/ui/StatsCard';
 import SubscriptionCard from '../components/ui/SubscriptionCard';
 import PoolCard from '../components/ui/PoolCard2';
-import { CreditCard, DollarSign, Users, ArrowUpRight } from 'lucide-react';
+import { CreditCard, DollarSign, Users, ArrowUpRight, ChevronLeft, ChevronRight, Loader } from 'lucide-react';
 import { poolService } from '../services/poolService';
 
 // Types for joined pools
@@ -27,37 +27,6 @@ interface JoinedPool {
   serviceLogoUrl?: string;
 }
 
-// Mock data for subscriptions
-const subscriptions = [
-  {
-    id: '1',
-    name: 'Netflix',
-    logo: '/assets/logos/netflix.svg',
-    price: 15.99,
-    description: 'Premium streaming service with movies, TV shows, and more.',
-    color: '#E50914',
-    activePools: 3
-  },
-  {
-    id: '2',
-    name: 'Spotify',
-    logo: '/assets/logos/spotify.svg',
-    price: 9.99,
-    description: 'Music streaming with millions of songs and podcasts.',
-    color: '#1DB954',
-    activePools: 5
-  },
-  {
-    id: '3',
-    name: 'Disney+',
-    logo: '/assets/logos/disneyplus.svg',
-    price: 8.99,
-    description: 'Stream Disney, Marvel, Star Wars, and more.',
-    color: '#0063E5',
-    activePools: 2
-  }
-];
-
 // Service color mapping
 const serviceColors: Record<string, string> = {
   'Netflix': '#E50914',
@@ -71,17 +40,40 @@ const serviceColors: Record<string, string> = {
 
 const Dashboard: NextPage = () => {
   const [joinedPools, setJoinedPools] = useState<JoinedPool[]>([]);
+  const [popularServices, setPopularServices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalMonthlySpending, setTotalMonthlySpending] = useState(0);
+  const [scrollPosition, setScrollPosition] = useState(0);
+  const [maxScroll, setMaxScroll] = useState(0);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchUserPools = async () => {
       try {
         const pools = await poolService.getUserPools();
-        setJoinedPools(pools);
+        
+        // Fetch service info for each pool if not already included
+        const enrichedPools = await Promise.all(pools.map(async (pool) => {
+          if (!pool.serviceName || !pool.serviceLogoUrl) {
+            try {
+              const serviceInfo = await poolService.getServiceInfo(pool.serviceId);
+              return {
+                ...pool,
+                serviceName: serviceInfo.name,
+                serviceLogoUrl: serviceInfo.logoUrl
+              };
+            } catch (error) {
+              console.error(`Error fetching service info for pool ${pool.poolId}:`, error);
+              return pool;
+            }
+          }
+          return pool;
+        }));
+        
+        setJoinedPools(enrichedPools);
         
         // Calculate total monthly spending
-        const total = pools.reduce((sum, pool) => {
+        const total = enrichedPools.reduce((sum, pool) => {
           return sum + parseFloat(pool.costPerSlot);
         }, 0);
         setTotalMonthlySpending(total);
@@ -92,8 +84,96 @@ const Dashboard: NextPage = () => {
       }
     };
     
+    const fetchPopularServices = async () => {
+      try {
+        // In a real scenario, you would fetch this from your API
+        // For now, using the mock data but structuring it as if from an API
+        setPopularServices([
+          {
+            id: '1',
+            name: 'Netflix',
+            logo: '/assets/logos/netflix.svg',
+            price: 15.99,
+            description: 'Premium streaming service with movies, TV shows, and more.',
+            color: '#E50914',
+            activePools: 3
+          },
+          {
+            id: '2',
+            name: 'Spotify',
+            logo: '/assets/logos/spotify.svg',
+            price: 9.99,
+            description: 'Music streaming with millions of songs and podcasts.',
+            color: '#1DB954',
+            activePools: 5
+          },
+          {
+            id: '3',
+            name: 'Disney+',
+            logo: '/assets/logos/disneyplus.svg',
+            price: 8.99,
+            description: 'Stream Disney, Marvel, Star Wars, and more.',
+            color: '#0063E5',
+            activePools: 2
+          }
+        ]);
+      } catch (error) {
+        console.error("Error fetching popular services:", error);
+      }
+    };
+    
     fetchUserPools();
+    fetchPopularServices();
   }, []);
+
+  useEffect(() => {
+    // Update max scroll value when container loads or resizes
+    const updateMaxScroll = () => {
+      if (scrollContainerRef.current) {
+        const container = scrollContainerRef.current;
+        setMaxScroll(container.scrollWidth - container.clientWidth);
+      }
+    };
+
+    // Set initial maxScroll after component mounts
+    updateMaxScroll();
+
+    // Add resize listener
+    window.addEventListener('resize', updateMaxScroll);
+    
+    // Add scroll listener to track position
+    const handleScroll = () => {
+      if (scrollContainerRef.current) {
+        setScrollPosition(scrollContainerRef.current.scrollLeft);
+      }
+    };
+    
+    const container = scrollContainerRef.current;
+    if (container) {
+      container.addEventListener('scroll', handleScroll);
+    }
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('resize', updateMaxScroll);
+      if (container) {
+        container.removeEventListener('scroll', handleScroll);
+      }
+    };
+  }, [joinedPools]);
+
+  // Handle scroll buttons
+  const scrollLeft = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: -320, behavior: 'smooth' });
+    }
+  };
+
+  const scrollRight = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: 320, behavior: 'smooth' });
+    }
+  };
 
   // Transform joined pools to match PoolCard props
   const transformedPools = joinedPools.map(pool => {
@@ -101,7 +181,7 @@ const Dashboard: NextPage = () => {
     const serviceColor = serviceColors[pool.serviceName || ''] || '#6366f1';
     
     // Calculate expiration date (1 month from join date)
-    const joinDate = new Date(pool.membershipStatus.joinedAt);
+    const joinDate = new Date(pool.membershipStatus?.joinedAt || new Date());
     const expiresDate = new Date(joinDate);
     expiresDate.setMonth(joinDate.getMonth() + 1);
     
@@ -129,8 +209,10 @@ const Dashboard: NextPage = () => {
       splitCost: parseFloat(pool.costPerSlot),
       members: members,
       capacity: pool.slotsTotal,
+      slotsAvailable: pool.slotsAvailable || 0,
       expiresAt: expiresDate.toISOString(),
-      status: pool.membershipStatus.accessStatus === 'active' ? 'active' : 'pending'
+      status: pool.membershipStatus?.accessStatus === 'active' ? 'active' : 'pending',
+      isUserMember: true 
     };
   });
 
@@ -162,9 +244,9 @@ const Dashboard: NextPage = () => {
         />
         <StatsCard 
           title="Active Pools"
-          value={joinedPools.filter(p => p.membershipStatus.accessStatus === 'active').length}
+          value={joinedPools.filter(p => p.membershipStatus?.accessStatus === 'active').length}
           icon={<Users size={20} />}
-          description={`${joinedPools.length - joinedPools.filter(p => p.membershipStatus.accessStatus === 'active').length} pending`}
+          description={`${joinedPools.length - joinedPools.filter(p => p.membershipStatus?.accessStatus === 'active').length} pending`}
         />
         <StatsCard 
           title="Total Saved"
@@ -175,31 +257,92 @@ const Dashboard: NextPage = () => {
         />
       </div>
       
-      {/* Joined Pools */}
+      {/* Joined Pools - Horizontal Sliding Layout */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold">Your Joined Pools</h2>
-          <button className="text-purple-500 text-sm hover:text-purple-400 transition">
-            View All
-          </button>
         </div>
         
         {loading ? (
-          <div className="flex justify-center py-8">
-            <p>Loading your subscription pools...</p>
-          </div>
-        ) : joinedPools.length === 0 ? (
-          <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-6 text-center">
-            <p className="text-gray-600 dark:text-gray-300">You haven't joined any subscription pools yet.</p>
-            <button className="mt-4 bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 transition">
-              Browse Available Pools
-            </button>
-          </div>
+          <div className="flex flex-col items-center justify-center py-12">
+          <Loader size={32} className="text-purple-500 animate-spin mb-4" />
+          <p className="text-gray-400">Loading subscription pools...</p>
+        </div>
+      ) : joinedPools.length === 0 ? (
+        <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-6 text-center">
+          <p className="text-gray-600 dark:text-gray-300">You haven't joined any subscription pools yet.</p>
+          <button className="mt-4 bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 transition">
+            Browse Available Pools
+          </button>
+        </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {transformedPools.map(pool => (
-              <PoolCard key={pool.id} pool={pool} />
-            ))}
+          <div className="relative">
+            {/* Left scroll button - show if not at beginning */}
+            {scrollPosition > 0 && (
+              <button 
+                onClick={scrollLeft}
+                className="absolute left-0 top-1/2 -translate-y-1/2 -ml-4 z-10 h-10 w-10 bg-white dark:bg-gray-800 rounded-full shadow-lg flex items-center justify-center opacity-90 hover:opacity-100 transition"
+                aria-label="Scroll left"
+              >
+                <ChevronLeft size={20} className="text-gray-600 dark:text-gray-300" />
+              </button>
+            )}
+            
+            {/* Right scroll button - show if not at end */}
+            {scrollPosition < maxScroll && (
+              <button 
+                onClick={scrollRight}
+                className="absolute right-0 top-1/2 -translate-y-1/2 -mr-4 z-10 h-10 w-10 bg-white dark:bg-gray-800 rounded-full shadow-lg flex items-center justify-center opacity-90 hover:opacity-100 transition"
+                aria-label="Scroll right"
+              >
+                <ChevronRight size={20} className="text-gray-600 dark:text-gray-300" />
+              </button>
+            )}
+            
+            <div 
+              ref={scrollContainerRef}
+              className="flex overflow-x-auto pb-4 scrollbar-hide snap-x scroll-smooth"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              {transformedPools.map(pool => (
+                <div key={pool.id} className="flex-none w-80 mr-4 snap-start">
+                  <PoolCard pool={pool} />
+                </div>
+              ))}
+              {/* Add an empty div at the end for better scrolling */}
+              <div className="flex-none w-4"></div>
+            </div>
+            
+            {/* Add CSS for hiding scrollbar in different browsers */}
+            <style jsx>{`
+              .scrollbar-hide::-webkit-scrollbar {
+                display: none;
+              }
+            `}</style>
+            
+            {/* Progress indicators */}
+            {transformedPools.length > 1 && (
+              <div className="flex justify-center mt-4 space-x-1">
+                {transformedPools.map((_, index) => {
+                  // Calculate if this indicator represents the current visible card
+                  const cardWidth = 320; // Approximate width of a card + margin
+                  const isActive = 
+                    scrollPosition >= (index * cardWidth) - cardWidth/2 && 
+                    scrollPosition < ((index + 1) * cardWidth) - cardWidth/2;
+                  
+                  return (
+                    <div 
+                      key={index} 
+                      className={`h-1 rounded-full transition-all duration-300 ${
+                        isActive 
+                          ? 'w-6 bg-purple-500' 
+                          : 'w-3 bg-gray-300 dark:bg-gray-700'
+                      }`}
+                    />
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -214,8 +357,8 @@ const Dashboard: NextPage = () => {
         </div>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {subscriptions.map(subscription => (
-            <SubscriptionCard key={subscription.id} service={subscription} />
+          {popularServices.map(service => (
+            <SubscriptionCard key={service.id} service={service} />
           ))}
         </div>
       </div>
