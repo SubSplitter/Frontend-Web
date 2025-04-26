@@ -138,7 +138,7 @@ const SubscriptionsPage: NextPage = () => {
     const fetchServices = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch('http://localhost:3001/api/subscription-services');
+        const response = await fetch(process.env.NEXT_PUBLIC_API_URL+'subscription-services');
         
         if (!response.ok) {
           throw new Error(`Error: ${response.status}`);

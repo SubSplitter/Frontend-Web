@@ -52,7 +52,7 @@ class PoolService {
   private serviceCache: Map<string, ServiceInfo>;
   
   constructor() {
-    this.apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+    this.apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://www.subspliter.com/api';
     this.serviceCache = new Map();
   }
 

@@ -53,7 +53,8 @@ const CreatePoolPage: NextPage = () => {
     const fetchServices = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/subscription-services`);
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+        const response = await fetch(`${apiUrl}/subscription-services`);
         
         if (!response.ok) {
           throw new Error(`Failed to fetch services: ${response.status}`);
