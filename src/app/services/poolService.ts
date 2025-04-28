@@ -59,8 +59,10 @@ class PoolService {
   async getUserPools(): Promise<JoinedPool[]> {
     try {
       // Get authentication token first
-      const tokenResponse = await fetch('/api/auth');
-      
+      const tokenResponse = await fetch('/api/auth/', {  // add slash here
+        credentials: 'include',                          // include cookies
+      });
+            
       if (!tokenResponse.ok) {
         throw new Error('Failed to get authentication token');
       }
@@ -145,7 +147,10 @@ class PoolService {
   async getAllPools(): Promise<Pool[]> {
     try {
       // Make the API request
-      const tokenResponse = await fetch('/api/auth');
+      const tokenResponse = await fetch('/api/auth', {
+        credentials: 'include', // 👈 ADD THIS LINE
+      });
+
       if (!tokenResponse.ok) {
         throw new Error('Failed to get authentication token');
       }
@@ -156,8 +161,8 @@ class PoolService {
           'Authorization': `Bearer ${accessToken}`
         }
       });
-      // console.log("API :",`${this.apiUrl}/subscriptions`);
-      // console.log("API Response:", response);
+      console.log("API :",`${this.apiUrl}/subscriptions`);
+      console.log("API Response:", response);
       
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`);
@@ -165,7 +170,7 @@ class PoolService {
       
       // Parse the response as JSON
       const data = await response.json();
-      // console.log("API Data:", data);
+      console.log("API Data:", data);
       
       // Check if data is empty array and handle appropriately
       if (!data || data.length === 0) {
