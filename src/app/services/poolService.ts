@@ -52,7 +52,7 @@ class PoolService {
   private serviceCache: Map<string, ServiceInfo>;
   
   constructor() {
-    this.apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://www.subspliter.com/api';
+    this.apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://www.subspliter.com/api/api';
     this.serviceCache = new Map();
   }
 
@@ -145,7 +145,19 @@ class PoolService {
   async getAllPools(): Promise<Pool[]> {
     try {
       // Make the API request
-      const response = await fetch(`${this.apiUrl}/subscriptions`);
+      const tokenResponse = await fetch('/api/auth');
+      if (!tokenResponse.ok) {
+        throw new Error('Failed to get authentication token');
+      }
+      
+      const { accessToken } = await tokenResponse.json();
+      const response = await fetch(`${this.apiUrl}/subscriptions`, {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        }
+      });
+      // console.log("API :",`${this.apiUrl}/subscriptions`);
+      // console.log("API Response:", response);
       
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`);
@@ -153,7 +165,7 @@ class PoolService {
       
       // Parse the response as JSON
       const data = await response.json();
-      console.log("API Data:", data);
+      // console.log("API Data:", data);
       
       // Check if data is empty array and handle appropriately
       if (!data || data.length === 0) {
