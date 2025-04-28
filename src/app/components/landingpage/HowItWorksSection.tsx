@@ -1,32 +1,31 @@
-// components/HowItWorksSection.tsx
+// components/landingpage/HowItWorksSection.tsx
 'use client'
 import React from 'react';
 import { motion } from 'framer-motion';
-import Image from 'next/image';
 
 const steps = [
   {
     number: "01",
-    title: "Create Your Group",
-    description: "Sign up and create a new subscription group in just a few clicks.",
+    title: "Create Your Financial Group",
+    description: "Sign up and create a trusted circle of friends or family members who want to share subscription costs.",
     imagePlaceholder: "group-creation-screen"
   },
   {
     number: "02",
-    title: "Add Subscriptions",
-    description: "Add the services you want to share and set up payment details.",
+    title: "Add Services",
+    description: "Add the subscription services you want to share from our list of supported services with multi-user plans.",
     imagePlaceholder: "add-subscription-screen"
   },
   {
     number: "03",
-    title: "Invite Members",
-    description: "Send invites to friends and family to join your subscription group.",
+    title: "Invite Trusted Members",
+    description: "Send invites to your trusted circle to join your subscription expense management group.",
     imagePlaceholder: "invite-members-screen"
   },
   {
     number: "04",
-    title: "Manage & Save",
-    description: "Track payments, split costs, and watch your savings grow each month.",
+    title: "Split & Save",
+    description: "Our secure payment system handles the splitting of costs, while you enjoy the savings each month.",
     imagePlaceholder: "dashboard-screen"
   }
 ];
@@ -43,7 +42,7 @@ const HowItWorksSection: React.FC = () => {
             viewport={{ once: true }}
             className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4"
           >
-            How SubSplitter <span className="text-indigo-600 dark:text-indigo-400">Works</span>
+            How Subspace <span className="text-indigo-600 dark:text-indigo-400">Works</span>
           </motion.h2>
           <motion.p 
             initial={{ opacity: 0 }}
@@ -52,7 +51,7 @@ const HowItWorksSection: React.FC = () => {
             viewport={{ once: true }}
             className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto"
           >
-            Managing group subscriptions has never been this simple.
+            Smart subscription management that respects terms of service
           </motion.p>
         </div>
         
@@ -93,7 +92,7 @@ const HowItWorksSection: React.FC = () => {
                       <div className="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
                       <div className="w-3 h-3 rounded-full bg-yellow-500 mr-2"></div>
                       <div className="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
-                      <div className="ml-2 text-xs text-gray-500 dark:text-gray-400">SubSplitter</div>
+                      <div className="ml-2 text-xs text-gray-500 dark:text-gray-400">Subspace</div>
                     </div>
                     <div className="aspect-video bg-gray-100 dark:bg-gray-700 relative">
                       <div className="absolute inset-0 flex items-center justify-center text-gray-400 dark:text-gray-500 text-lg font-medium">

@@ -6,10 +6,10 @@ import FeaturesSection from './components/landingpage/FeaturesSection';
 import HowItWorksSection from './components/landingpage/HowItWorksSection';
 import StatsSection from './components/landingpage/StatsSection';
 import TestimonialsSection from './components/landingpage/TestimonialsSection';
-import TrustedBySection from './components/landingpage/TrustedBySection';
-import PricingSection from './components/landingpage/PricingSection';
+// import TrustedBySection from './components/landingpage/TrustedBySection';
+// import PricingSection from './components/landingpage/PricingSection';
 import FAQSection from './components/landingpage/FAQSection';
-import CTASection from './components/landingpage/CTASection';
+// import CTASection from './components/landingpage/CTASection';
 import Footer from './components/landingpage/Footer';
 
 export default function Home() {
@@ -18,7 +18,7 @@ export default function Home() {
       <Navbar />
       <main>
         <HeroSection />
-        <TrustedBySection />
+        {/* <TrustedBySection /> */}
         <div id="features">
           <FeaturesSection />
         </div>
@@ -27,13 +27,13 @@ export default function Home() {
           <HowItWorksSection />
         </div>
         <TestimonialsSection />
-        <div id="pricing">
+        {/* <div id="pricing">
           <PricingSection />
-        </div>
+        </div> */}
         <div id="faq">
           <FAQSection />
         </div>
-        <CTASection />
+        {/* <CTASection /> */}
       </main>
       <Footer />
     </>

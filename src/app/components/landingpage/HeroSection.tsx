@@ -1,10 +1,56 @@
-'use client';  // Add this at the top to mark as a client component
+// components/landingpage/HeroSection.tsx
+'use client';
 
 import React from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 
 const HeroSection: React.FC = () => {
+  // Define subscription data with user avatars
+  const subscriptions = [
+    {
+      name: 'Netflix', 
+      price: '₹649', 
+      memberCount: 4,
+      members: [
+        '/avatar/user1.jpg', 
+        '/avatar/user2.jpg', 
+        '/avatar/user3.jpg',
+        '/avatar/user4.jpg'
+      ]
+    },
+    {
+      name: 'Spotify', 
+      price: '₹179', 
+      memberCount: 6,
+      members: [
+        '/avatar/user5.jpg', 
+        '/avatar/user2.jpg', 
+        '/avatar/user6.jpg',
+        '/avatar/user3.jpg',
+        '/avatar/user7.jpg',
+        '/avatar/user1.jpg'
+      ]
+    },
+    {
+      name: 'Prime', 
+      price: '₹299', 
+      memberCount: 2,
+      members: [
+        '/avatar/user8.jpg',
+        '/avatar/user4.jpg'
+      ]
+    }
+  ];
+
+  // Popular subscription service logos for the avatar section
+  const popularServices = [
+    { name: 'Netflix', icon: '/assets/logos/netflix.svg' },
+    { name: 'Spotify', icon: '/assets/logos/youtube-icon-5.svg' },
+    { name: 'Prime', icon: '/assets/logos/adobe-2.svg' },
+    { name: 'Disney+', icon: '/assets/logos/disney-plus.svg' }
+  ];
+
   return (
     <div className="relative overflow-hidden bg-gradient-to-br from-indigo-900 via-purple-900 to-violet-950 min-h-screen flex items-center">
       {/* Animated background elements */}
@@ -24,19 +70,19 @@ const HeroSection: React.FC = () => {
           transition={{ duration: 0.8 }}
         >
           <h1 className="text-5xl md:text-6xl font-extrabold leading-tight mb-6">
-            <span className="block">Manage Group</span>
+            <span className="block">Smart Subscription</span>
             <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-              Subscriptions Effortlessly
+              Sharing for Friends
             </span>
           </h1>
           
           <p className="text-xl md:text-2xl text-indigo-100 mb-8 max-w-xl">
-            Split costs, track payments, and manage shared subscriptions in one place. No more awkward money talks with friends.
+            Split costs, track payments, and manage shared subscriptions in one place. Save up to 70% on your monthly subscription bills.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4">
             <button className="px-8 py-4 bg-indigo-500 hover:bg-indigo-600 text-white font-bold rounded-lg shadow-lg transition duration-300 transform hover:-translate-y-1">
-              Get Started
+              Start Saving Today
             </button>
             <button className="px-8 py-4 bg-transparent border-2 border-indigo-300 text-indigo-100 font-bold rounded-lg hover:bg-indigo-800/30 transition duration-300 transform hover:-translate-y-1">
               How It Works
@@ -45,14 +91,23 @@ const HeroSection: React.FC = () => {
           
           <div className="mt-12 flex items-center">
             <div className="flex -space-x-2">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className={`w-10 h-10 rounded-full border-2 border-indigo-900 bg-gradient-to-br from-purple-${i*100} to-indigo-${i*100} flex items-center justify-center text-xs font-bold`}>
-                  {i === 4 ? '+' : ''}
+              {popularServices.slice(0, 3).map((service, i) => (
+                <div key={i} className="w-10 h-10 rounded-full border-2 border-indigo-900 bg-black/40 backdrop-blur-sm flex items-center justify-center overflow-hidden">
+                  <Image
+                    src={service.icon}
+                    alt={service.name}
+                    width={24}
+                    height={24}
+                    className="w-6 h-6 object-contain"
+                  />
                 </div>
               ))}
+              <div className="w-10 h-10 rounded-full border-2 border-indigo-900 bg-black/40 backdrop-blur-sm flex items-center justify-center text-xs font-bold text-white">
+                +
+              </div>
             </div>
             <p className="ml-4 text-indigo-200">
-              Join <span className="font-bold">10,000+</span> subscription sharers
+              Join <span className="font-bold">5,000+</span> subscription sharers
             </p>
           </div>
         </motion.div>
@@ -71,33 +126,48 @@ const HeroSection: React.FC = () => {
                 <div className="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
                 <div className="w-3 h-3 rounded-full bg-yellow-500 mr-2"></div>
                 <div className="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
-                <div className="ml-2 text-xs text-indigo-300">SubSplitter Dashboard</div>
+                <div className="ml-2 text-xs text-indigo-300">Subspliter Dashboard</div>
               </div>
               <div className="p-4">
                 <div className="grid grid-cols-3 gap-3">
-                  {/* Subscription cards */}
-                  {['Netflix', 'Spotify', 'Disney+'].map((service, index) => (
-                    <div key={service} className="bg-indigo-900/30 border border-indigo-500/20 rounded-lg p-3">
+                  {/* Subscription cards with real user avatars */}
+                  {subscriptions.map((service) => (
+                    <div key={service.name} className="bg-indigo-900/30 border border-indigo-500/20 rounded-lg p-3">
                       <div className="flex justify-between mb-2">
-                        <span className="text-sm font-medium text-indigo-200">{service}</span>
+                        <span className="text-sm font-medium text-indigo-200">{service.name}</span>
                         <span className="text-xs text-green-400">Active</span>
                       </div>
-                      <div className="text-lg font-bold text-white">${(9.99 * (index + 1)).toFixed(2)}<span className="text-xs text-indigo-300">/mo</span></div>
+                      <div className="text-lg font-bold text-white">{service.price}<span className="text-xs text-indigo-300">/mo</span></div>
                       <div className="mt-2 flex items-center justify-between">
                         <div className="flex">
-                          <div className="w-6 h-6 rounded-full bg-purple-600 flex items-center justify-center text-xs">U</div>
-                          <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-xs -ml-1">J</div>
-                          <div className="w-6 h-6 rounded-full bg-indigo-600 flex items-center justify-center text-xs -ml-1">K</div>
+                          {/* Show first 3 avatars */}
+                          {service.members.slice(0, 3).map((avatar, idx) => (
+                            <div key={idx} className={`w-6 h-6 rounded-full overflow-hidden border border-indigo-500/30 ${idx > 0 ? '-ml-1' : ''}`}>
+                              <Image
+                                src={avatar}
+                                alt="User avatar"
+                                width={24}
+                                height={24}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          ))}
+                          {/* Show count of additional members if more than 3 */}
+                          {service.memberCount > 3 && (
+                            <div className="w-6 h-6 rounded-full bg-black/30 flex items-center justify-center text-xs text-white -ml-1 border border-indigo-500/30">
+                              +{service.memberCount - 3}
+                            </div>
+                          )}
                         </div>
-                        <span className="text-xs text-indigo-300">3 members</span>
+                        <span className="text-xs text-indigo-300">{service.memberCount} members</span>
                       </div>
                     </div>
                   ))}
                 </div>
                 <div className="mt-4 p-3 bg-indigo-600/20 rounded-lg border border-indigo-500/30">
                   <div className="flex justify-between mb-2">
-                    <span className="text-sm font-medium text-white">Total Monthly Savings</span>
-                    <span className="text-sm font-bold text-green-400">$26.98</span>
+                    <span className="text-sm font-medium text-white">Your Monthly Savings</span>
+                    <span className="text-sm font-bold text-green-400">₹780</span>
                   </div>
                   <div className="w-full bg-indigo-800/30 rounded-full h-2">
                     <div className="bg-gradient-to-r from-blue-400 to-purple-600 h-2 rounded-full w-2/3"></div>

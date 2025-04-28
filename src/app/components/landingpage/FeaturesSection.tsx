@@ -1,4 +1,5 @@
-'use client';  // Add this at the top to mark as a client component
+// components/landingpage/FeaturesSection.tsx
+'use client';
 
 import React from 'react';
 import { motion } from 'framer-motion';
@@ -8,12 +9,12 @@ const features = [
   {
     icon: <CreditCard className="w-8 h-8" />,
     title: "Simplified Payments",
-    description: "Automate subscription payments and split costs evenly among group members."
+    description: "Automated payment splitting without the need to exchange account credentials."
   },
   {
     icon: <Users className="w-8 h-8" />,
-    title: "Invite Friends",
-    description: "Share subscription access with friends and family in just a few clicks."
+    title: "Family & Friend Groups",
+    description: "Create trusted circles for sharing subscription costs within your household."
   },
   {
     icon: <Bell className="w-8 h-8" />,
@@ -22,18 +23,18 @@ const features = [
   },
   {
     icon: <DollarSign className="w-8 h-8" />,
-    title: "Cost Tracking",
-    description: "Track expenses and see exactly how much you're saving each month."
+    title: "Expense Tracking",
+    description: "Track shared expenses and see exactly how much you're saving each month."
   },
   {
     icon: <Zap className="w-8 h-8" />,
-    title: "Instant Setup",
-    description: "Set up your subscription group in minutes with our intuitive interface."
+    title: "Multi-Plan Support",
+    description: "Compatible with all popular streaming services' family and multi-user plans."
   },
   {
     icon: <ShieldCheck className="w-8 h-8" />,
     title: "Secure Sharing",
-    description: "Share access without sharing your personal account credentials."
+    description: "Our system complies with all terms of service and protects your privacy."
   }
 ];
 
@@ -72,7 +73,7 @@ const FeaturesSection: React.FC = () => {
             viewport={{ once: true }}
             className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4"
           >
-            Why Choose <span className="text-indigo-600 dark:text-indigo-400">SubSplitter</span>
+            Why Choose <span className="text-indigo-600 dark:text-indigo-400">SubSpliter</span>
           </motion.h2>
           <motion.p 
             initial={{ opacity: 0 }}
@@ -81,7 +82,7 @@ const FeaturesSection: React.FC = () => {
             viewport={{ once: true }}
             className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto"
           >
-            We've simplified group subscription management so you can save money without the hassle.
+            We've simplified subscription expense management so you can save money without the hassle.
           </motion.p>
         </div>
         
