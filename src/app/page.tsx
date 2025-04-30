@@ -7,7 +7,7 @@ import HowItWorksSection from './components/landingpage/HowItWorksSection';
 import StatsSection from './components/landingpage/StatsSection';
 import TestimonialsSection from './components/landingpage/TestimonialsSection';
 // import TrustedBySection from './components/landingpage/TrustedBySection';
-import PricingSection from './components/landingpage/PricingSection';
+import SubscriptionCalculatorSection from './components/landingpage/PricingSection';
 import FAQSection from './components/landingpage/FAQSection';
 // import CTASection from './components/landingpage/CTASection';
 import Footer from './components/landingpage/Footer';
@@ -28,7 +28,7 @@ export default function Home() {
         </div>
         <TestimonialsSection />
         <div id="pricing">
-          <PricingSection />
+          <SubscriptionCalculatorSection />
         </div>
         <div id="faq">
           <FAQSection />
