@@ -1,38 +1,43 @@
 // components/landingpage/HowItWorksSection.tsx
 'use client'
 import React from 'react';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 
 const steps = [
   {
     number: "01",
-    title: "Create Your Financial Group",
-    description: "Sign up and create a trusted circle of friends or family members who want to share subscription costs.",
-    imagePlaceholder: "group-creation-screen"
+    title: "Browse Available Subscriptions",
+    description: "Explore our curated catalog of subscription services with multi-user plans that support legitimate family and group sharing.",
+    imageSrc: "/howItWorks/services.png",
+    altText: "Browse subscription services interface"
   },
   {
     number: "02",
-    title: "Add Services",
-    description: "Add the subscription services you want to share from our list of supported services with multi-user plans.",
-    imagePlaceholder: "add-subscription-screen"
+    title: "Join or Create Sharing Pools",
+    description: "Choose from existing subscription pools with open slots or create your own to invite trusted friends and family members.",
+    imageSrc: "/howItWorks/pools.png",
+    altText: "Subscription pools interface"
   },
   {
     number: "03",
-    title: "Invite Trusted Members",
-    description: "Send invites to your trusted circle to join your subscription expense management group.",
-    imagePlaceholder: "invite-members-screen"
+    title: "Create Your Sharing Group",
+    description: "Set up your subscription group in minutes, customize access levels, and send secure invitations to your trusted circle.",
+    imageSrc: "/howItWorks/createpool.png",
+    altText: "Group creation interface"
   },
   {
     number: "04",
-    title: "Split & Save",
-    description: "Our secure payment system handles the splitting of costs, while you enjoy the savings each month.",
-    imagePlaceholder: "dashboard-screen"
+    title: "Manage Everything in One Dashboard",
+    description: "Track expenses, monitor usage, handle payments, and maximize your savings all from our intuitive dashboard.",
+    imageSrc: "/howItWorks/dashboard.png",
+    altText: "subSpliter dashboard interface"
   }
 ];
 
 const HowItWorksSection: React.FC = () => {
   return (
-    <section className="py-24 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-gray-900 dark:to-indigo-950 overflow-hidden">
+    <section id="how-it-works" className="py-24 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-gray-900 dark:to-indigo-950 overflow-hidden">
       <div className="container mx-auto px-6">
         <div className="text-center mb-16">
           <motion.h2 
@@ -42,7 +47,7 @@ const HowItWorksSection: React.FC = () => {
             viewport={{ once: true }}
             className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4"
           >
-            How Subspace <span className="text-indigo-600 dark:text-indigo-400">Works</span>
+            How subSpliter <span className="text-indigo-600 dark:text-indigo-400">Works</span>
           </motion.h2>
           <motion.p 
             initial={{ opacity: 0 }}
@@ -51,7 +56,7 @@ const HowItWorksSection: React.FC = () => {
             viewport={{ once: true }}
             className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto"
           >
-            Smart subscription management that respects terms of service
+            Smart subscription sharing that respects terms of service while maximizing your savings
           </motion.p>
         </div>
         
@@ -92,12 +97,17 @@ const HowItWorksSection: React.FC = () => {
                       <div className="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
                       <div className="w-3 h-3 rounded-full bg-yellow-500 mr-2"></div>
                       <div className="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
-                      <div className="ml-2 text-xs text-gray-500 dark:text-gray-400">Subspace</div>
+                      <div className="ml-2 text-xs text-gray-500 dark:text-gray-400">subSpliter</div>
                     </div>
-                    <div className="aspect-video bg-gray-100 dark:bg-gray-700 relative">
-                      <div className="absolute inset-0 flex items-center justify-center text-gray-400 dark:text-gray-500 text-lg font-medium">
-                        {step.imagePlaceholder} UI Preview
-                      </div>
+                    <div className="aspect-video bg-gray-100 dark:bg-gray-700 relative overflow-hidden">
+                      <Image
+                        src={step.imageSrc}
+                        alt={step.altText}
+                        fill
+                        className="object-cover object-center"
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                        priority={index === 0}
+                      />
                     </div>
                   </div>
                 </div>

@@ -16,7 +16,7 @@ export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
     { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
     { name: 'Subscriptions', href: '/subscriptions', icon: CreditCardIcon },
     { name: 'Pools', href: '/pools', icon: UsersIcon },
-    { name: 'Profile', href: '/profile', icon: UserIcon },
+    // { name: 'Profile', href: '/profile', icon: UserIcon },
     { name: 'Settings', href: '/settings', icon: SettingsIcon },
   ];
 
