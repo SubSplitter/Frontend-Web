@@ -64,7 +64,8 @@ class PoolService {
       });
             
       if (!tokenResponse.ok) {
-        throw new Error('Failed to get authentication token');
+        console.error('Auth token fetch failed with status:', tokenResponse.status);
+        return []; // Return empty array instead of throwing
       }
       
       const { accessToken } = await tokenResponse.json();
@@ -77,7 +78,9 @@ class PoolService {
       });
       
       if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
+        // Log error but don't throw - just return empty array
+        console.error(`API error fetching user pools: ${response.status}`);
+        return [];
       }
       
       const data = await response.json();
@@ -146,25 +149,45 @@ class PoolService {
 
   async getAllPools(): Promise<Pool[]> {
     try {
-      // Make the API request
+      // Make the auth request with proper credentials
       const tokenResponse = await fetch('/api/auth', {
-        credentials: 'include', // 👈 ADD THIS LINE
-      });
-
-      if (!tokenResponse.ok) {
-        throw new Error('Failed to get authentication token');
-      }
-      
-      const { accessToken } = await tokenResponse.json();
-      const response = await fetch(`${this.apiUrl}/subscriptions`, {
+        method: 'GET',
+        credentials: 'include',
         headers: {
-          'Authorization': `Bearer ${accessToken}`
+          'Content-Type': 'application/json'
         }
       });
-      console.log("API :",`${this.apiUrl}/subscriptions`);
+      
+      // More detailed error handling for auth
+      if (!tokenResponse.ok) {
+        console.error('Auth response status:', tokenResponse.status);
+        throw new Error(`Authentication failed: ${tokenResponse.status}`);
+      }
+      
+      // Extract token with error handling
+      const tokenData = await tokenResponse.json();
+      if (!tokenData || !tokenData.accessToken) {
+        console.error('Invalid token data:', tokenData);
+        throw new Error('Missing access token in response');
+      }
+      
+      const accessToken = tokenData.accessToken;
+      
+      // Make the API request with token
+      const response = await fetch(`${this.apiUrl}/subscriptions`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include' // Include credentials for this request too
+      });
+      
+      console.log("API:", `${this.apiUrl}/subscriptions`);
       console.log("API Response:", response);
       
       if (!response.ok) {
+        console.error('Subscription response headers:', Object.fromEntries([...response.headers]));
         throw new Error(`API error: ${response.status}`);
       }
       

@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { UserCircle, LogOut, Settings, CreditCard } from 'lucide-react';
 import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs";
+import {LogoutLink} from "@kinde-oss/kinde-auth-nextjs/components";
 
 export default function UserMenu() {
   const [isOpen, setIsOpen] = useState(false);
@@ -31,9 +32,9 @@ export default function UserMenu() {
     return names.map(name => name?.[0] || "").join("");
   };
 
-  const handleLogout = () => {
-    logout();
-  };
+  // const handleLogout = () => {
+  //   logout();
+  // };
 
   return (
     <div className="relative" ref={menuRef}>
@@ -88,13 +89,13 @@ export default function UserMenu() {
           </Link>
           
           <div className="border-t border-gray-700 mt-1 pt-1">
-            <button 
-              onClick={handleLogout}
+            <LogoutLink 
+              // onClick={handleLogout}
               className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 flex items-center"
             >
               <LogOut size={16} className="mr-2" />
               <span>Sign out</span>
-            </button>
+            </LogoutLink>
           </div>
         </div>
       )}

@@ -7,7 +7,7 @@ import DashboardLayout from '../components/layout/DashboardLayout';
 import StatsCard from '../components/ui/StatsCard';
 import SubscriptionCard from '../components/ui/SubscriptionCard';
 import PoolCard from '../components/ui/PoolCard2';
-import { CreditCard, DollarSign, Users, ArrowUpRight, ChevronLeft, ChevronRight, Loader } from 'lucide-react';
+import { CreditCard, DollarSign, Users, ArrowUpRight, ChevronLeft, ChevronRight, Loader, Search, UsersRound } from 'lucide-react';
 import { poolService } from '../services/poolService';
 
 // Types for joined pools
@@ -175,6 +175,17 @@ const Dashboard: NextPage = () => {
     }
   };
 
+  // Add the missing scrollToIndex function
+  const scrollToIndex = (index: number) => {
+    if (scrollContainerRef.current) {
+      const cardWidth = 320; // Approximate width of a card + margin
+      scrollContainerRef.current.scrollTo({
+        left: index * cardWidth,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   // Transform joined pools to match PoolCard props
   const transformedPools = joinedPools.map(pool => {
     // Use the service color from our mapping, or default to purple
@@ -222,167 +233,115 @@ const Dashboard: NextPage = () => {
         <title>Dashboard | SubSplitter</title>
       </Head>
       
-      {/* <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-1">Welcome back, John</h1>
-        <p className="text-gray-400">Here's what's happening with your subscriptions</p>
-      </div> */}
-      
-      {/* Stats Row */}
-      {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <StatsCard 
-          title="Total Subscriptions"
-          value={joinedPools.length}
-          icon={<CreditCard size={20} />}
-          description={`Across ${new Set(joinedPools.map(p => p.serviceName)).size} services`}
-        />
-        <StatsCard 
-          title="Monthly Spending"
-          value={`$${totalMonthlySpending.toFixed(2)}`}
-          trend={{ value: 15, isPositive: false }}
-          icon={<DollarSign size={20} />}
-          description="vs. $32.48 last month"
-        />
-        <StatsCard 
-          title="Active Pools"
-          value={joinedPools.filter(p => p.membershipStatus?.accessStatus === 'active').length}
-          icon={<Users size={20} />}
-          description={`${joinedPools.length - joinedPools.filter(p => p.membershipStatus?.accessStatus === 'active').length} pending`}
-        />
-        <StatsCard 
-          title="Total Saved"
-          value="$142.68"
-          trend={{ value: 8, isPositive: true }}
-          icon={<ArrowUpRight size={20} />}
-          description="Lifetime savings"
-        />
-      </div> */}
-      
       {/* Joined Pools - Horizontal Sliding Layout */}
-{/* Joined Pools - Horizontal Sliding Layout */}
-<div className="mb-8">
-  <div className="flex items-center justify-between mb-4">
-    <h2 className="text-xl font-bold">Your Joined Pools</h2>
-  </div>
-  
-  {loading ? (
-    <div className="flex flex-col items-center justify-center py-12">
-      <Loader size={32} className="text-purple-500 animate-spin mb-4" />
-      <p className="text-gray-400">Loading subscription pools...</p>
-    </div>
-  ) : joinedPools.length === 0 ? (
-    <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-lg p-8 text-center border border-gray-200 dark:border-gray-700 shadow-sm">
-      <div className="flex flex-col items-center">
-        <div className="bg-purple-100 dark:bg-purple-900/30 p-4 rounded-full mb-4">
-          <UsersRound size={32} className="text-purple-500 dark:text-purple-400" />
-        </div>
-        <h3 className="text-lg font-medium mb-2">No Subscription Pools Joined</h3>
-        <p className="text-gray-600 dark:text-gray-300 mb-6 max-w-md">
-          Join subscription pools to share costs and access premium content with other members.
-        </p>
-        <button className="bg-purple-500 hover:bg-purple-600 text-white font-medium px-6 py-2.5 rounded-lg transition shadow-sm hover:shadow flex items-center gap-2">
-          <Search size={16} />
-          Browse Available Pools
-        </button>
-      </div>
-    </div>
-  ) : (
-    <div className="relative">
-      <div 
-        ref={scrollContainerRef}
-        className="flex overflow-x-auto pb-4 scrollbar-hide snap-x scroll-smooth"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-      >
-        {transformedPools.map(pool => (
-          <div key={pool.id} className="flex-none w-80 mr-4 snap-start">
-            <PoolCard pool={pool} />
-          </div>
-        ))}
-        {/* Add an empty div at the end for better scrolling */}
-        <div className="flex-none w-4"></div>
-      </div>
-      
-      {/* Add CSS for hiding scrollbar in different browsers */}
-      <style jsx>{`
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-      `}</style>
-      
-      {/* Navigation controls and progress indicators moved to bottom */}
-      {transformedPools.length > 1 && (
-        <div className="flex items-center justify-center mt-6 gap-4">
-          {/* Left scroll button */}
-          <button 
-            onClick={scrollLeft}
-            disabled={scrollPosition <= 0}
-            className={`h-8 w-8 rounded-full flex items-center justify-center transition ${
-              scrollPosition > 0 
-                ? 'bg-purple-100 dark:bg-gray-700 text-purple-600 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-gray-600' 
-                : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'
-            }`}
-            aria-label="Scroll left"
-          >
-            <ChevronLeft size={18} />
-          </button>
-          
-          {/* Progress indicators */}
-          <div className="flex items-center gap-1.5">
-            {transformedPools.map((_, index) => {
-              // Calculate if this indicator represents the current visible card
-              const cardWidth = 320; // Approximate width of a card + margin
-              const isActive = 
-                scrollPosition >= (index * cardWidth) - cardWidth/2 && 
-                scrollPosition < ((index + 1) * cardWidth) - cardWidth/2;
-              
-              return (
-                <button
-                  key={index}
-                  onClick={() => scrollToIndex(index)}
-                  className={`h-2 rounded-full transition-all duration-300 ${
-                    isActive 
-                      ? 'w-6 bg-purple-500' 
-                      : 'w-2 bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600'
-                  }`}
-                  aria-label={`Go to pool ${index + 1}`}
-                />
-              );
-            })}
-          </div>
-          
-          {/* Right scroll button */}
-          <button 
-            onClick={scrollRight}
-            disabled={scrollPosition >= maxScroll}
-            className={`h-8 w-8 rounded-full flex items-center justify-center transition ${
-              scrollPosition < maxScroll 
-                ? 'bg-purple-100 dark:bg-gray-700 text-purple-600 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-gray-600' 
-                : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'
-            }`}
-            aria-label="Scroll right"
-          >
-            <ChevronRight size={18} />
-          </button>
-        </div>
-      )}
-    </div>
-  )}
-</div>
-      
-      {/* Popular Subscriptions */}
-      {/* <div>
+      <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold">Popular Subscriptions</h2>
-          <button className="text-purple-500 text-sm hover:text-purple-400 transition">
-            Browse All
-          </button>
+          <h2 className="text-xl font-bold">Your Joined Pools</h2>
         </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {popularServices.map(service => (
-            <SubscriptionCard key={service.id} service={service} />
-          ))}
-        </div>
-      </div> */}
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-12">
+            <Loader size={32} className="text-purple-500 animate-spin mb-4" />
+            <p className="text-gray-400">Loading subscription pools...</p>
+          </div>
+        ) : joinedPools.length === 0 ? (
+          <div className="bg-gray-800 rounded-xl p-8 text-center">
+            <div className="mx-auto w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mb-4">
+              <UsersRound size={24} className="text-gray-500" />
+            </div>
+            <h3 className="text-xl font-semibold mb-2">No Subscription Pools Joined</h3>
+            <p className="text-gray-400 mb-4">
+              Join subscription pools to share costs and access premium content with other members.
+            </p>
+            <button 
+      onClick={() => window.location.href = '/pools'}
+      className="bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-md flex items-center justify-center transition duration-200 mx-auto">
+      <Search size={16} className="mr-2" />
+      Browse Available Pools
+    </button>
+          </div>
+        ) : (
+          <div className="relative">
+            <div 
+              ref={scrollContainerRef}
+              className="flex overflow-x-auto pb-4 scrollbar-hide snap-x scroll-smooth"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              {transformedPools.map(pool => (
+                <div key={pool.id} className="flex-none w-80 mr-4 snap-start">
+                  <PoolCard pool={pool} />
+                </div>
+              ))}
+              {/* Add an empty div at the end for better scrolling */}
+              <div className="flex-none w-4"></div>
+            </div>
+            
+            {/* Add CSS for hiding scrollbar in different browsers */}
+            <style jsx>{`
+              .scrollbar-hide::-webkit-scrollbar {
+                display: none;
+              }
+            `}</style>
+            
+            {/* Navigation controls and progress indicators moved to bottom */}
+            {transformedPools.length > 1 && (
+              <div className="flex items-center justify-center mt-6 gap-4">
+                {/* Left scroll button */}
+                <button 
+                  onClick={scrollLeft}
+                  disabled={scrollPosition <= 0}
+                  className={`h-8 w-8 rounded-full flex items-center justify-center transition ${
+                    scrollPosition > 0 
+                      ? 'bg-purple-100 dark:bg-gray-700 text-purple-600 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-gray-600' 
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'
+                  }`}
+                  aria-label="Scroll left"
+                >
+                  <ChevronLeft size={18} />
+                </button>
+                
+                {/* Progress indicators */}
+                <div className="flex items-center gap-1.5">
+                  {transformedPools.map((_, index) => {
+                    // Calculate if this indicator represents the current visible card
+                    const cardWidth = 320; // Approximate width of a card + margin
+                    const isActive = 
+                      scrollPosition >= (index * cardWidth) - cardWidth/2 && 
+                      scrollPosition < ((index + 1) * cardWidth) - cardWidth/2;
+                    
+                    return (
+                      <button
+                        key={index}
+                        onClick={() => scrollToIndex(index)}
+                        className={`h-2 rounded-full transition-all duration-300 ${
+                          isActive 
+                            ? 'w-6 bg-purple-500' 
+                            : 'w-2 bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600'
+                        }`}
+                        aria-label={`Go to pool ${index + 1}`}
+                      />
+                    );
+                  })}
+                </div>
+                
+                {/* Right scroll button */}
+                <button 
+                  onClick={scrollRight}
+                  disabled={scrollPosition >= maxScroll}
+                  className={`h-8 w-8 rounded-full flex items-center justify-center transition ${
+                    scrollPosition < maxScroll 
+                      ? 'bg-purple-100 dark:bg-gray-700 text-purple-600 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-gray-600' 
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'
+                  }`}
+                  aria-label="Scroll right"
+                >
+                  <ChevronRight size={18} />
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </DashboardLayout>
   );
 };
