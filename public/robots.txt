@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://subspliter.com
+
+# Sitemaps
+Sitemap: https://subspliter.com/sitemap.xml
