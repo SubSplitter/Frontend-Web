@@ -28,6 +28,7 @@ interface JoinedPool {
     accessStatus: string;
     joinedAt: string;
   };
+  membershipId?: string;
   serviceName?: string;
   serviceLogoUrl?: string;
 }
@@ -296,7 +297,7 @@ class PoolService {
     }
   }
 
-  async leavePool(poolId: string): Promise<void> {
+  async leavePool(poolMemberId: string): Promise<void> {
     try {
       // Get authentication token first
       const tokenResponse = await fetch('/api/auth');
@@ -307,7 +308,7 @@ class PoolService {
       
       const { accessToken } = await tokenResponse.json();
 
-      const response = await fetch(`${this.apiUrl}/subscriptions/${poolId}/leave`, {
+      const response = await fetch(`${this.apiUrl}/pool-members/${poolMemberId}/leave`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -315,7 +316,7 @@ class PoolService {
         }
         // No need to send userId in body since it will be extracted from token
       });
-
+      console.log("Leave Pool Response:", response);
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`);
       }

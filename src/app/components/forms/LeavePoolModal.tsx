@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Loader2, AlertTriangle, Check, X } from 'lucide-react';
+import { poolService } from '../../services/poolService'; // Import the poolService
 
 interface LeavePoolModalProps {
   poolId: string;
+  poolMemberId?: string; // Optional poolMemberId
   poolName: string;
   isOpen: boolean;
   onClose: () => void;
@@ -11,6 +13,7 @@ interface LeavePoolModalProps {
 
 export default function LeavePoolModal({
   poolId,
+  poolMemberId,
   poolName,
   isOpen,
   onClose,
@@ -18,20 +21,56 @@ export default function LeavePoolModal({
 }: LeavePoolModalProps) {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState<string>('');
+  const [membershipId, setMembershipId] = useState<string | null>(poolMemberId || null);
+
+  // Fetch the pool member ID if not provided
+  useEffect(() => {
+    const fetchMemberId = async () => {
+      if (!poolMemberId && poolId && isOpen) {
+        try {
+          // Get current user's membership ID for this pool
+          const userPools = await poolService.getUserPools();
+          const currentPool = userPools.find(pool => pool.poolId === poolId);
+          
+          if (currentPool && currentPool.membershipStatus) {
+            // Assuming the API response includes a membershipId field
+            // If not, you'll need to adjust this based on your actual API response
+            setMembershipId(currentPool.membershipId || poolId);
+          } else {
+            setMembershipId(poolId); // Fallback to poolId if membership not found
+          }
+        } catch (error) {
+          console.error('Error fetching membership details:', error);
+          setMembershipId(poolId); // Fallback to poolId
+        }
+      } else if (poolMemberId) {
+        setMembershipId(poolMemberId);
+      }
+    };
+    
+    fetchMemberId();
+  }, [poolId, poolMemberId, isOpen]);
 
   // Handle leaving a pool
   const handleLeavePool = async () => {
     try {
       setStatus('loading');
-      // We'll use the poolService to leave the pool
-      // This import and function call will be handled in the component where this modal is used
-      // await poolService.leavePool(poolId);
-      onSuccess(); // This will trigger the leave action in the parent component
+      
+      if (!membershipId) {
+        throw new Error('Membership ID not found');
+      }
+      
+      // Call the poolService.leavePool method with the membershipId
+      await poolService.leavePool(membershipId);
+      
+      // If successful, call the onSuccess callback passed from parent
+      onSuccess();
       setStatus('success');
       
       // Wait a moment before closing the modal
       setTimeout(() => {
         onClose();
+        setStatus('idle'); // Reset state for next time the modal opens
       }, 1500);
     } catch (error: any) {
       console.error('Error leaving pool:', error);
