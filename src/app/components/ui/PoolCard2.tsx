@@ -24,6 +24,7 @@ interface PoolCardProps {
     expiresAt: string;
     status?: 'active' | 'pending' | 'expired';
     isUserMember?: boolean;
+    membershipId?: string; // Now properly used in the component
   };
   onClick?: () => void;
   onJoin?: () => void;
@@ -42,8 +43,6 @@ export default function PoolCard({ pool, onClick, onJoin, onLeave, currentUserId
   
   // Check if the current user is already a member
   const isUserMember = pool.isUserMember || pool.members.some(member => member.id === currentUserId);
-
-  console.log("Pool:", pool.serviceName, "- isUserMember:", isUserMember);
   
   // Handle missing images gracefully
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
@@ -56,6 +55,12 @@ export default function PoolCard({ pool, onClick, onJoin, onLeave, currentUserId
   const handleLeave = (e: React.MouseEvent) => {
     e.stopPropagation();
     setShowLeaveModal(true);
+  };
+
+  // Handle successful leave action
+  const handleLeaveSuccess = () => {
+    console.log("Successful leave in PoolCard, calling parent onLeave callback");
+    if (onLeave) onLeave();
   };
   
   return (
@@ -173,12 +178,11 @@ export default function PoolCard({ pool, onClick, onJoin, onLeave, currentUserId
       {/* Leave Pool Modal */}
       <LeavePoolModal
         poolId={pool.id}
+        poolMemberId={pool.membershipId} // Pass the membership ID properly
         poolName={pool.serviceName}
         isOpen={showLeaveModal}
         onClose={() => setShowLeaveModal(false)}
-        onSuccess={() => {
-          if (onLeave) onLeave();
-        }}
+        onSuccess={handleLeaveSuccess} // Use our new handler that calls parent onLeave
       />
     </>
   );

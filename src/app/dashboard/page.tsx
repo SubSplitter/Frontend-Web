@@ -1,6 +1,6 @@
 // pages/dashboard.tsx
 'use client';
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { NextPage } from 'next';
 import Head from 'next/head';
 import DashboardLayout from '../components/layout/DashboardLayout';
@@ -18,6 +18,7 @@ interface JoinedPool {
   slotsTotal: number;
   slotsAvailable: number;
   costPerSlot: string;
+  membershipId?: string; // Add the membershipId to pass to PoolCard
   membershipStatus: {
     paymentStatus: string;
     accessStatus: string;
@@ -47,42 +48,46 @@ const Dashboard: NextPage = () => {
   const [maxScroll, setMaxScroll] = useState(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const fetchUserPools = async () => {
-      try {
-        const pools = await poolService.getUserPools();
-        
-        // Fetch service info for each pool if not already included
-        const enrichedPools = await Promise.all(pools.map(async (pool) => {
-          if (!pool.serviceName || !pool.serviceLogoUrl) {
-            try {
-              const serviceInfo = await poolService.getServiceInfo(pool.serviceId);
-              return {
-                ...pool,
-                serviceName: serviceInfo.name,
-                serviceLogoUrl: serviceInfo.logoUrl
-              };
-            } catch (error) {
-              console.error(`Error fetching service info for pool ${pool.poolId}:`, error);
-              return pool;
-            }
+  // Create a fetchUserPools function that can be reused
+  const fetchUserPools = useCallback(async () => {
+    try {
+      setLoading(true);
+      const pools = await poolService.getUserPools();
+      
+      // Fetch service info for each pool if not already included
+      const enrichedPools = await Promise.all(pools.map(async (pool) => {
+        if (!pool.serviceName || !pool.serviceLogoUrl) {
+          try {
+            const serviceInfo = await poolService.getServiceInfo(pool.serviceId);
+            return {
+              ...pool,
+              serviceName: serviceInfo.name,
+              serviceLogoUrl: serviceInfo.logoUrl
+            };
+          } catch (error) {
+            console.error(`Error fetching service info for pool ${pool.poolId}:`, error);
+            return pool;
           }
-          return pool;
-        }));
-        
-        setJoinedPools(enrichedPools);
-        
-        // Calculate total monthly spending
-        const total = enrichedPools.reduce((sum, pool) => {
-          return sum + parseFloat(pool.costPerSlot);
-        }, 0);
-        setTotalMonthlySpending(total);
-      } catch (error) {
-        console.error("Error fetching user pools:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+        }
+        return pool;
+      }));
+      
+      setJoinedPools(enrichedPools);
+      
+      // Calculate total monthly spending
+      const total = enrichedPools.reduce((sum, pool) => {
+        return sum + parseFloat(pool.costPerSlot);
+      }, 0);
+      setTotalMonthlySpending(total);
+    } catch (error) {
+      console.error("Error fetching user pools:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchUserPools();
     
     const fetchPopularServices = async () => {
       try {
@@ -122,9 +127,8 @@ const Dashboard: NextPage = () => {
       }
     };
     
-    fetchUserPools();
     fetchPopularServices();
-  }, []);
+  }, [fetchUserPools]);
 
   useEffect(() => {
     // Update max scroll value when container loads or resizes
@@ -186,6 +190,12 @@ const Dashboard: NextPage = () => {
     }
   };
 
+  // Handle callback when a user leaves a pool
+  const handlePoolLeave = useCallback(() => {
+    console.log("Pool left successfully, refreshing pools list");
+    fetchUserPools(); // Refresh the pools list
+  }, [fetchUserPools]);
+
   // Transform joined pools to match PoolCard props
   const transformedPools = joinedPools.map(pool => {
     // Use the service color from our mapping, or default to purple
@@ -223,7 +233,8 @@ const Dashboard: NextPage = () => {
       slotsAvailable: pool.slotsAvailable || 0,
       expiresAt: expiresDate.toISOString(),
       status: pool.membershipStatus?.accessStatus === 'active' ? 'active' : 'pending',
-      isUserMember: true 
+      isUserMember: true,
+      membershipId: pool.membershipId // Pass the membershipId to the PoolCard
     };
   });
 
@@ -254,11 +265,11 @@ const Dashboard: NextPage = () => {
               Join subscription pools to share costs and access premium content with other members.
             </p>
             <button 
-      onClick={() => window.location.href = '/pools'}
-      className="bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-md flex items-center justify-center transition duration-200 mx-auto">
-      <Search size={16} className="mr-2" />
-      Browse Available Pools
-    </button>
+              onClick={() => window.location.href = '/pools'}
+              className="bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-md flex items-center justify-center transition duration-200 mx-auto">
+              <Search size={16} className="mr-2" />
+              Browse Available Pools
+            </button>
           </div>
         ) : (
           <div className="relative">
@@ -269,7 +280,10 @@ const Dashboard: NextPage = () => {
             >
               {transformedPools.map(pool => (
                 <div key={pool.id} className="flex-none w-80 mr-4 snap-start">
-                  <PoolCard pool={pool} />
+                  <PoolCard 
+                    pool={pool} 
+                    onLeave={handlePoolLeave} // Pass the onLeave callback
+                  />
                 </div>
               ))}
               {/* Add an empty div at the end for better scrolling */}

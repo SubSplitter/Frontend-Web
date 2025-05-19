@@ -56,12 +56,16 @@ export default function LeavePoolModal({
     try {
       setStatus('loading');
       
-      if (!membershipId) {
+      // Prioritize the provided poolMemberId if it exists
+      const idToUse = poolMemberId || membershipId;
+      
+      if (!idToUse) {
         throw new Error('Membership ID not found');
       }
       
-      // Call the poolService.leavePool method with the membershipId
-      await poolService.leavePool(membershipId);
+      // Call the poolService.leavePool method with the membership ID
+      console.log(`Using membershipId: ${idToUse} to leave pool`);
+      await poolService.leavePool(idToUse);
       
       // If successful, call the onSuccess callback passed from parent
       onSuccess();

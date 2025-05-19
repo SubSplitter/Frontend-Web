@@ -23,12 +23,12 @@ interface JoinedPool {
   slotsTotal: number;
   slotsAvailable: number;
   costPerSlot: string;
+  membershipId?: string; // Added to store the membership ID for leave operations
   membershipStatus: {
     paymentStatus: string;
     accessStatus: string;
     joinedAt: string;
   };
-  membershipId?: string;
   serviceName?: string;
   serviceLogoUrl?: string;
 }
@@ -60,13 +60,13 @@ class PoolService {
   async getUserPools(): Promise<JoinedPool[]> {
     try {
       // Get authentication token first
-      const tokenResponse = await fetch('/api/auth/', {  // add slash here
-        credentials: 'include',                          // include cookies
+      const tokenResponse = await fetch('/api/auth/', {
+        credentials: 'include',
       });
             
       if (!tokenResponse.ok) {
         console.error('Auth token fetch failed with status:', tokenResponse.status);
-        return []; // Return empty array instead of throwing
+        return [];
       }
       
       const { accessToken } = await tokenResponse.json();
@@ -79,7 +79,6 @@ class PoolService {
       });
       
       if (!response.ok) {
-        // Log error but don't throw - just return empty array
         console.error(`API error fetching user pools: ${response.status}`);
         return [];
       }
@@ -95,11 +94,11 @@ class PoolService {
         slotsTotal: pool.slotsTotal,
         slotsAvailable: pool.slotsAvailable,
         costPerSlot: pool.costPerSlot,
+        membershipId: pool.membershipId, // Store the membership ID for leave operations
         membershipStatus: {
-          // Use default values if not provided by API
-          paymentStatus: 'paid',
-          accessStatus: pool.isActive ? 'active' : 'inactive',
-          joinedAt: pool.createdAt
+          paymentStatus: pool.memberInfo?.paymentStatus || 'unpaid',
+          accessStatus: pool.memberInfo?.accessStatus || 'pending',
+          joinedAt: pool.memberInfo?.joinedAt || pool.createdAt
         }
       }));
     } catch (error) {
@@ -297,8 +296,16 @@ class PoolService {
     }
   }
 
-  async leavePool(poolMemberId: string): Promise<void> {
+  // Updated leavePool method to properly handle the API response
+  async leavePool(membershipId: string): Promise<void> {
     try {
+      if (!membershipId) {
+        throw new Error('Membership ID is required to leave a pool');
+      }
+      
+      // Log the membership ID for debugging
+      console.log(`Attempting to leave pool with membership ID: ${membershipId}`);
+      
       // Get authentication token first
       const tokenResponse = await fetch('/api/auth');
       
@@ -308,17 +315,25 @@ class PoolService {
       
       const { accessToken } = await tokenResponse.json();
 
-      const response = await fetch(`${this.apiUrl}/pool-members/${poolMemberId}/leave`, {
+      // Make sure we're using the correct endpoint format with the membership ID
+      const response = await fetch(`${this.apiUrl}/pool-members/${membershipId}/leave`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${accessToken}`
         }
-        // No need to send userId in body since it will be extracted from token
       });
+      
       console.log("Leave Pool Response:", response);
+      
       if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
+        // Try to parse error message from response
+        try {
+          const errorData = await response.json();
+          throw new Error(errorData.message || `API error: ${response.status}`);
+        } catch (e) {
+          throw new Error(`Failed to leave pool. API status: ${response.status}`);
+        }
       }
     } catch (error) {
       console.error('Error leaving pool:', error);
