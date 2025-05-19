@@ -48,6 +48,11 @@ interface CreatePoolData {
   costPerSlot: number;
 }
 
+interface CreatedPool extends ApiPool {
+  // This extends the ApiPool interface to ensure type safety
+  // While maintaining all the fields returned from the API
+}
+
 class PoolService {
   private apiUrl: string;
   private serviceCache: Map<string, ServiceInfo>;
@@ -293,6 +298,44 @@ class PoolService {
     } catch (error) {
       console.error('Error joining pool:', error);
       throw error;
+    }
+  }
+
+  // Add this method to the PoolService class
+  async getCreatedPools(): Promise<Pool[]> {
+    try {
+      // Get authentication token first
+      const tokenResponse = await fetch('/api/auth', {
+        credentials: 'include',
+      });
+            
+      if (!tokenResponse.ok) {
+        console.error('Auth token fetch failed with status:', tokenResponse.status);
+        return [];
+      }
+      
+      const { accessToken } = await tokenResponse.json();
+      
+      // Make the API request to get pools created by the current user
+      const response = await fetch(`${this.apiUrl}/subscriptions/my-created`, {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        }
+      });
+      
+      if (!response.ok) {
+        console.error(`API error fetching created pools: ${response.status}`);
+        return [];
+      }
+      
+      const data = await response.json();
+      console.log("Created Pools Data:", data);
+      
+      // Transform the data to match Pool interface using the existing transformPools method
+      return await this.transformPools(data);
+    } catch (error) {
+      console.error('Error fetching created pools:', error);
+      return [];
     }
   }
 

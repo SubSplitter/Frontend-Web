@@ -1,13 +1,10 @@
-// pages/dashboard.tsx
 'use client';
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { NextPage } from 'next';
 import Head from 'next/head';
 import DashboardLayout from '../components/layout/DashboardLayout';
-import StatsCard from '../components/ui/StatsCard';
-import SubscriptionCard from '../components/ui/SubscriptionCard';
 import PoolCard from '../components/ui/PoolCard2';
-import { CreditCard, DollarSign, Users, ArrowUpRight, ChevronLeft, ChevronRight, Loader, Search, UsersRound } from 'lucide-react';
+import { Loader, Search, UsersRound, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import { poolService } from '../services/poolService';
 
 // Types for joined pools
@@ -18,7 +15,7 @@ interface JoinedPool {
   slotsTotal: number;
   slotsAvailable: number;
   costPerSlot: string;
-  membershipId?: string; // Add the membershipId to pass to PoolCard
+  membershipId?: string;
   membershipStatus: {
     paymentStatus: string;
     accessStatus: string;
@@ -41,12 +38,15 @@ const serviceColors: Record<string, string> = {
 
 const Dashboard: NextPage = () => {
   const [joinedPools, setJoinedPools] = useState<JoinedPool[]>([]);
-  const [popularServices, setPopularServices] = useState<any[]>([]);
+  const [createdPools, setCreatedPools] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [totalMonthlySpending, setTotalMonthlySpending] = useState(0);
+  const [createdPoolsLoading, setCreatedPoolsLoading] = useState(true);
   const [scrollPosition, setScrollPosition] = useState(0);
   const [maxScroll, setMaxScroll] = useState(0);
+  const [createdScrollPosition, setCreatedScrollPosition] = useState(0);
+  const [createdMaxScroll, setCreatedMaxScroll] = useState(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const createdScrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Create a fetchUserPools function that can be reused
   const fetchUserPools = useCallback(async () => {
@@ -73,12 +73,6 @@ const Dashboard: NextPage = () => {
       }));
       
       setJoinedPools(enrichedPools);
-      
-      // Calculate total monthly spending
-      const total = enrichedPools.reduce((sum, pool) => {
-        return sum + parseFloat(pool.costPerSlot);
-      }, 0);
-      setTotalMonthlySpending(total);
     } catch (error) {
       console.error("Error fetching user pools:", error);
     } finally {
@@ -86,49 +80,23 @@ const Dashboard: NextPage = () => {
     }
   }, []);
 
+  // Create a fetchCreatedPools function to get pools created by the user
+  const fetchCreatedPools = useCallback(async () => {
+    try {
+      setCreatedPoolsLoading(true);
+      const pools = await poolService.getCreatedPools();
+      setCreatedPools(pools);
+    } catch (error) {
+      console.error("Error fetching created pools:", error);
+    } finally {
+      setCreatedPoolsLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     fetchUserPools();
-    
-    const fetchPopularServices = async () => {
-      try {
-        // In a real scenario, you would fetch this from your API
-        // For now, using the mock data but structuring it as if from an API
-        setPopularServices([
-          {
-            id: '1',
-            name: 'Netflix',
-            logo: '/assets/logos/netflix.svg',
-            price: 15.99,
-            description: 'Premium streaming service with movies, TV shows, and more.',
-            color: '#E50914',
-            activePools: 3
-          },
-          {
-            id: '2',
-            name: 'Spotify',
-            logo: '/assets/logos/spotify.svg',
-            price: 9.99,
-            description: 'Music streaming with millions of songs and podcasts.',
-            color: '#1DB954',
-            activePools: 5
-          },
-          {
-            id: '3',
-            name: 'Disney+',
-            logo: '/assets/logos/disneyplus.svg',
-            price: 8.99,
-            description: 'Stream Disney, Marvel, Star Wars, and more.',
-            color: '#0063E5',
-            activePools: 2
-          }
-        ]);
-      } catch (error) {
-        console.error("Error fetching popular services:", error);
-      }
-    };
-    
-    fetchPopularServices();
-  }, [fetchUserPools]);
+    fetchCreatedPools();
+  }, [fetchUserPools, fetchCreatedPools]);
 
   useEffect(() => {
     // Update max scroll value when container loads or resizes
@@ -136,6 +104,11 @@ const Dashboard: NextPage = () => {
       if (scrollContainerRef.current) {
         const container = scrollContainerRef.current;
         setMaxScroll(container.scrollWidth - container.clientWidth);
+      }
+      
+      if (createdScrollContainerRef.current) {
+        const container = createdScrollContainerRef.current;
+        setCreatedMaxScroll(container.scrollWidth - container.clientWidth);
       }
     };
 
@@ -145,16 +118,29 @@ const Dashboard: NextPage = () => {
     // Add resize listener
     window.addEventListener('resize', updateMaxScroll);
     
-    // Add scroll listener to track position
+    // Add scroll listener to track position for joined pools
     const handleScroll = () => {
       if (scrollContainerRef.current) {
         setScrollPosition(scrollContainerRef.current.scrollLeft);
       }
     };
     
+    // Add scroll listener to track position for created pools
+    const handleCreatedScroll = () => {
+      if (createdScrollContainerRef.current) {
+        setCreatedScrollPosition(createdScrollContainerRef.current.scrollLeft);
+      }
+    };
+    
     const container = scrollContainerRef.current;
+    const createdContainer = createdScrollContainerRef.current;
+    
     if (container) {
       container.addEventListener('scroll', handleScroll);
+    }
+    
+    if (createdContainer) {
+      createdContainer.addEventListener('scroll', handleCreatedScroll);
     }
 
     // Cleanup
@@ -163,10 +149,13 @@ const Dashboard: NextPage = () => {
       if (container) {
         container.removeEventListener('scroll', handleScroll);
       }
+      if (createdContainer) {
+        createdContainer.removeEventListener('scroll', handleCreatedScroll);
+      }
     };
-  }, [joinedPools]);
+  }, [joinedPools, createdPools]);
 
-  // Handle scroll buttons
+  // Handle scroll buttons for joined pools
   const scrollLeft = () => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollBy({ left: -320, behavior: 'smooth' });
@@ -179,11 +168,35 @@ const Dashboard: NextPage = () => {
     }
   };
 
-  // Add the missing scrollToIndex function
+  // Handle scroll buttons for created pools
+  const scrollCreatedLeft = () => {
+    if (createdScrollContainerRef.current) {
+      createdScrollContainerRef.current.scrollBy({ left: -320, behavior: 'smooth' });
+    }
+  };
+
+  const scrollCreatedRight = () => {
+    if (createdScrollContainerRef.current) {
+      createdScrollContainerRef.current.scrollBy({ left: 320, behavior: 'smooth' });
+    }
+  };
+
+  // Add the scrollToIndex function for joined pools
   const scrollToIndex = (index: number) => {
     if (scrollContainerRef.current) {
       const cardWidth = 320; // Approximate width of a card + margin
       scrollContainerRef.current.scrollTo({
+        left: index * cardWidth,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  // Add scrollToIndex function for created pools
+  const scrollCreatedToIndex = (index: number) => {
+    if (createdScrollContainerRef.current) {
+      const cardWidth = 320; // Approximate width of a card + margin
+      createdScrollContainerRef.current.scrollTo({
         left: index * cardWidth,
         behavior: 'smooth'
       });
@@ -234,9 +247,16 @@ const Dashboard: NextPage = () => {
       expiresAt: expiresDate.toISOString(),
       status: pool.membershipStatus?.accessStatus === 'active' ? 'active' : 'pending',
       isUserMember: true,
-      membershipId: pool.membershipId // Pass the membershipId to the PoolCard
+      membershipId: pool.membershipId,
+      isCreator: false
     };
   });
+
+  // Add isCreator: true to created pools
+  const transformedCreatedPools = createdPools.map(pool => ({
+    ...pool,
+    isCreator: true
+  }));
 
   return (
     <DashboardLayout>
@@ -244,7 +264,120 @@ const Dashboard: NextPage = () => {
         <title>Dashboard | SubSplitter</title>
       </Head>
       
-      {/* Joined Pools - Horizontal Sliding Layout */}
+      {/* Pools Created by You */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-bold">Pools You Created</h2>
+          <button 
+            onClick={() => window.location.href = '/pools/create-pool'}
+            className="bg-purple-600 hover:bg-purple-700 text-white text-sm py-1.5 px-3 rounded-md flex items-center transition duration-200"
+          >
+            <Plus size={16} className="mr-1.5" />
+            New Pool
+          </button>
+        </div>
+        
+        {createdPoolsLoading ? (
+          <div className="flex flex-col items-center justify-center py-12">
+            <Loader size={32} className="text-purple-500 animate-spin mb-4" />
+            <p className="text-gray-400">Loading your created pools...</p>
+          </div>
+        ) : transformedCreatedPools.length === 0 ? (
+          <div className="bg-gray-800 rounded-xl p-8 text-center">
+            <div className="mx-auto w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mb-4">
+              <UsersRound size={24} className="text-gray-500" />
+            </div>
+            <h3 className="text-xl font-semibold mb-2">No Pools Created Yet</h3>
+            <p className="text-gray-400 mb-4">
+              Create your own subscription pools to share with others and split the costs.
+            </p>
+            <button 
+              onClick={() => window.location.href = '/create-pool'}
+              className="bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-md flex items-center justify-center transition duration-200 mx-auto">
+              <Plus size={16} className="mr-2" />
+              Create New Pool
+            </button>
+          </div>
+        ) : (
+          <div className="relative">
+            <div 
+              ref={createdScrollContainerRef}
+              className="flex overflow-x-auto pb-4 scrollbar-hide snap-x scroll-smooth"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              {transformedCreatedPools.map(pool => (
+                <div key={pool.id} className="flex-none w-80 mr-4 snap-start">
+                  <PoolCard 
+                    pool={pool}
+                    onLeave={handlePoolLeave}
+                  />
+                </div>
+              ))}
+              <div className="flex-none w-4"></div>
+            </div>
+            
+            <style jsx>{`
+              .scrollbar-hide::-webkit-scrollbar {
+                display: none;
+              }
+            `}</style>
+            
+            {transformedCreatedPools.length > 1 && (
+              <div className="flex items-center justify-center mt-6 gap-4">
+                <button 
+                  onClick={scrollCreatedLeft}
+                  disabled={createdScrollPosition <= 0}
+                  className={`h-8 w-8 rounded-full flex items-center justify-center transition ${
+                    createdScrollPosition > 0 
+                      ? 'bg-purple-600 dark:bg-purple-700 text-white dark:text-white hover:bg-purple-700 dark:hover:bg-purple-600' 
+                      : 'bg-gray-600 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'
+                  }`}
+                  aria-label="Scroll left"
+                >
+                  <ChevronLeft size={18} />
+                </button>
+                
+                <div className="flex items-center gap-1.5">
+                  {transformedCreatedPools.map((_, index) => {
+                    const cardWidth = 320;
+                    const isActive = 
+                      createdScrollPosition >= (index * cardWidth) - cardWidth/2 && 
+                      createdScrollPosition < ((index + 1) * cardWidth) - cardWidth/2;
+                    
+                    return (
+                      <button
+                        key={index}
+                        onClick={() => scrollCreatedToIndex(index)}
+                        className={`h-2 rounded-full transition-all duration-300 ${
+                          isActive 
+                            ? 'w-6 bg-purple-500' 
+                            : 'w-2 bg-gray-600 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600'
+                        }`}
+                        aria-label={`Go to created pool ${index + 1}`}
+                      />
+                    );
+                  })}
+                </div>
+                
+                <button 
+                  onClick={scrollCreatedRight}
+                  disabled={createdScrollPosition >= createdMaxScroll}
+                  className={`h-8 w-8 rounded-full flex items-center justify-center transition ${
+                    createdScrollPosition < createdMaxScroll 
+                      ? 'bg-purple-700 dark:bg-gray-700 text-white dark:text-white hover:bg-purple-700 dark:hover:bg-gray-600' 
+                      : 'bg-gray-600 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'
+                  }`}
+                  aria-label="Scroll right"
+                >
+                  <ChevronRight size={18} />
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+      
+      {/* Your Joined Pools */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold">Your Joined Pools</h2>
@@ -282,43 +415,37 @@ const Dashboard: NextPage = () => {
                 <div key={pool.id} className="flex-none w-80 mr-4 snap-start">
                   <PoolCard 
                     pool={pool} 
-                    onLeave={handlePoolLeave} // Pass the onLeave callback
+                    onLeave={handlePoolLeave}
                   />
                 </div>
               ))}
-              {/* Add an empty div at the end for better scrolling */}
               <div className="flex-none w-4"></div>
             </div>
             
-            {/* Add CSS for hiding scrollbar in different browsers */}
             <style jsx>{`
               .scrollbar-hide::-webkit-scrollbar {
                 display: none;
               }
             `}</style>
             
-            {/* Navigation controls and progress indicators moved to bottom */}
             {transformedPools.length > 1 && (
               <div className="flex items-center justify-center mt-6 gap-4">
-                {/* Left scroll button */}
                 <button 
                   onClick={scrollLeft}
                   disabled={scrollPosition <= 0}
                   className={`h-8 w-8 rounded-full flex items-center justify-center transition ${
                     scrollPosition > 0 
-                      ? 'bg-purple-100 dark:bg-gray-700 text-purple-600 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-gray-600' 
-                      : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'
+                      ? 'bg-purple-600 dark:bg-purple-700 text-white dark:text-white hover:bg-purple-700 dark:hover:bg-purple-600' 
+                      : 'bg-gray-600 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'
                   }`}
                   aria-label="Scroll left"
                 >
                   <ChevronLeft size={18} />
                 </button>
                 
-                {/* Progress indicators */}
                 <div className="flex items-center gap-1.5">
                   {transformedPools.map((_, index) => {
-                    // Calculate if this indicator represents the current visible card
-                    const cardWidth = 320; // Approximate width of a card + margin
+                    const cardWidth = 320;
                     const isActive = 
                       scrollPosition >= (index * cardWidth) - cardWidth/2 && 
                       scrollPosition < ((index + 1) * cardWidth) - cardWidth/2;
@@ -330,7 +457,7 @@ const Dashboard: NextPage = () => {
                         className={`h-2 rounded-full transition-all duration-300 ${
                           isActive 
                             ? 'w-6 bg-purple-500' 
-                            : 'w-2 bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600'
+                            : 'w-2 bg-gray-600 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600'
                         }`}
                         aria-label={`Go to pool ${index + 1}`}
                       />
@@ -338,14 +465,13 @@ const Dashboard: NextPage = () => {
                   })}
                 </div>
                 
-                {/* Right scroll button */}
                 <button 
                   onClick={scrollRight}
                   disabled={scrollPosition >= maxScroll}
                   className={`h-8 w-8 rounded-full flex items-center justify-center transition ${
                     scrollPosition < maxScroll 
-                      ? 'bg-purple-100 dark:bg-gray-700 text-purple-600 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-gray-600' 
-                      : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'
+                      ? 'bg-purple-700 dark:bg-gray-700 text-white dark:text-white hover:bg-purple-700 dark:hover:bg-gray-600' 
+                      : 'bg-gray-600 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'
                   }`}
                   aria-label="Scroll right"
                 >
