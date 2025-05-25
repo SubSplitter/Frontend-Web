@@ -1,0 +1,32 @@
+Refector Dashboard into smaller reusable components
+
+Recommended Component Structure
+/components
+  /dashboard
+    PoolsSection.tsx       // Generic container for displaying pools with title and options
+    CreatedPoolsSection.tsx // Section specific for created pools
+    JoinedPoolsSection.tsx  // Section specific for joined pools
+    ExpiredPoolsSection.tsx // Future section for expired pools
+    PoolsCarousel.tsx      // Reusable horizontal scrolling component with navigation
+  /ui
+    PoolCard.tsx           // Your existing card component
+    LoadingState.tsx       // Reusable loading component 
+    EmptyState.tsx         // Reusable empty state component
+Dashboard.tsx
+Your main Dashboard page would import these components and have a clean structure:
+tsxconst Dashboard: NextPage = () => {
+  return (
+    <DashboardLayout>
+      <Head>
+        <title>Dashboard | SubSplitter</title>
+      </Head>
+      
+      <CreatedPoolsSection />
+      <JoinedPoolsSection />
+      {/* Future sections */}
+      {/* <ExpiredPoolsSection /> */}
+      {/* <PoolsYouLeftSection /> */}
+    </DashboardLayout>
+  );
+};
+This approach drastically reduces the complexity of your main Dashboard file and makes each component responsible for its own data fetching, state management, and UI rendering.
