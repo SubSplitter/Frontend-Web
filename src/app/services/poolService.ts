@@ -297,6 +297,9 @@ class PoolService {
     }
   }
 
+  // Add this method to your PoolService class
+ 
+
   async leavePool(poolMemberId: string): Promise<void> {
     try {
       // Get authentication token first
