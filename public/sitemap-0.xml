@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:mobile="http://www.google.com/schemas/sitemap-mobile/1.0" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
-<url><loc>https://subspliter.com/dashboard</loc><lastmod>2025-05-02T16:20:48.439Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://subspliter.com</loc><lastmod>2025-05-02T16:20:48.440Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://subspliter.com/pools</loc><lastmod>2025-05-02T16:20:48.440Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://subspliter.com/settings</loc><lastmod>2025-05-02T16:20:48.440Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://subspliter.com/subscriptions</loc><lastmod>2025-05-02T16:20:48.440Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://subspliter.com/pools/create-pool</loc><lastmod>2025-05-02T16:20:48.440Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://subspliter.com/cancellation-refund</loc><lastmod>2025-06-21T14:50:17.169Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://subspliter.com/dashboard</loc><lastmod>2025-06-21T14:50:17.170Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://subspliter.com</loc><lastmod>2025-06-21T14:50:17.170Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://subspliter.com/contact-us</loc><lastmod>2025-06-21T14:50:17.170Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://subspliter.com/pools/create-pool</loc><lastmod>2025-06-21T14:50:17.170Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://subspliter.com/pools</loc><lastmod>2025-06-21T14:50:17.170Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://subspliter.com/privacy-policy</loc><lastmod>2025-06-21T14:50:17.170Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://subspliter.com/settings</loc><lastmod>2025-06-21T14:50:17.170Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://subspliter.com/shipping-delivery</loc><lastmod>2025-06-21T14:50:17.170Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://subspliter.com/terms&amp;conditions</loc><lastmod>2025-06-21T14:50:17.170Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://subspliter.com/subscriptions</loc><lastmod>2025-06-21T14:50:17.170Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
 </urlset>

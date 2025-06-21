@@ -70,7 +70,7 @@ const HowItWorksSection: React.FC = () => {
               viewport={{ once: true, margin: "-100px" }}
               className={`flex flex-col ${index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center gap-12`}
             >
-              <div className="lg:w-1/2">
+              <div className="lg:w-1/2 order-2 lg:order-none">
                 <div className="flex items-start mb-4">
                   <span className="text-5xl font-black text-indigo-200 dark:text-indigo-800 mr-4">{step.number}</span>
                   <div>
@@ -89,7 +89,7 @@ const HowItWorksSection: React.FC = () => {
                 </div>
               </div>
               
-              <div className="lg:w-1/2">
+              <div className="w-full lg:w-1/2 order-1 lg:order-none">
                 <div className="relative">
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-xl blur-xl"></div>
                   <div className="relative bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-2xl border border-gray-100 dark:border-gray-700">
@@ -99,13 +99,13 @@ const HowItWorksSection: React.FC = () => {
                       <div className="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
                       <div className="ml-2 text-xs text-gray-500 dark:text-gray-400">subSpliter</div>
                     </div>
-                    <div className="aspect-video bg-gray-100 dark:bg-gray-700 relative overflow-hidden">
+                    <div className="aspect-[4/3] sm:aspect-video bg-gray-100 dark:bg-gray-700 relative overflow-hidden min-h-[300px] sm:min-h-[200px]">
                       <Image
                         src={step.imageSrc}
                         alt={step.altText}
                         fill
                         className="object-cover object-center"
-                        sizes="(max-width: 768px) 100vw, 50vw"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 50vw"
                         priority={index === 0}
                       />
                     </div>
