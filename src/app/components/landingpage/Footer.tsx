@@ -72,7 +72,7 @@ const Footer: React.FC = () => {
         
         <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-sm">© 2025 SubSplitter. All rights reserved.</p>
-          <div className="mt-4 md:mt-0">
+          {/* <div className="mt-4 md:mt-0">
             <select
               className="bg-gray-800 border border-gray-700 text-white rounded-md py-2 px-4 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               aria-label="Change language"
@@ -82,7 +82,7 @@ const Footer: React.FC = () => {
               <option value="fr">Français</option>
               <option value="de">Deutsch</option>
             </select>
-          </div>
+          </div> */}
         </div>
       </div>
     </footer>

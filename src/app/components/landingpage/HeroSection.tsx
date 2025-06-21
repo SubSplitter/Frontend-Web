@@ -1,11 +1,10 @@
-// components/landingpage/HeroSection.tsx
 'use client';
 
 import React from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 
-const HeroSection: React.FC = () => {
+const HeroSection = () => {
   // Define subscription data with user avatars
   const subscriptions = [
     {
@@ -62,7 +61,7 @@ const HeroSection: React.FC = () => {
 
       {/* Hero content container */}
       <div className="container mx-auto px-6 relative z-10 py-24 flex flex-col lg:flex-row items-center">
-        {/* Left text column */}
+        {/* Left text column - UNCHANGED */}
         <motion.div 
           className="lg:w-1/2 text-white"
           initial={{ opacity: 0, y: 20 }}
@@ -112,7 +111,7 @@ const HeroSection: React.FC = () => {
           </div>
         </motion.div>
         
-        {/* Right illustration/mockup column */}
+        {/* Right illustration/mockup column - MOBILE RESPONSIVE */}
         <motion.div 
           className="lg:w-1/2 mt-12 lg:mt-0"
           initial={{ opacity: 0, x: 20 }}
@@ -122,55 +121,72 @@ const HeroSection: React.FC = () => {
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl blur-xl"></div>
             <div className="relative bg-black/80 backdrop-blur-sm border border-indigo-500/20 rounded-xl overflow-hidden shadow-2xl">
-              <div className="p-2 bg-black/30 border-b border-indigo-500/20 flex items-center">
+              <div className="p-2 sm:p-3 bg-black/30 border-b border-indigo-500/20 flex items-center">
                 <div className="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
                 <div className="w-3 h-3 rounded-full bg-yellow-500 mr-2"></div>
                 <div className="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
-                <div className="ml-2 text-xs text-indigo-300">Subspliter Dashboard</div>
+                <div className="ml-2 text-xs sm:text-sm text-indigo-300">Subspliter Dashboard</div>
               </div>
-              <div className="p-4">
-                <div className="grid grid-cols-3 gap-3">
+              <div className="p-3 sm:p-4">
+                {/* Mobile: Single column, Desktop: 3 columns */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                   {/* Subscription cards with real user avatars */}
                   {subscriptions.map((service) => (
-                    <div key={service.name} className="bg-indigo-900/30 border border-indigo-500/20 rounded-lg p-3">
-                      <div className="flex justify-between mb-2">
-                        <span className="text-sm font-medium text-indigo-200">{service.name}</span>
-                        <span className="text-xs text-green-400">Active</span>
+                    <div key={service.name} className="bg-indigo-900/30 border border-indigo-500/20 rounded-lg p-3 sm:p-4">
+                      <div className="flex justify-between mb-2 sm:mb-3">
+                        <span className="text-sm sm:text-base font-medium text-indigo-200">{service.name}</span>
+                        <span className="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded-full border border-green-500/30">Active</span>
                       </div>
-                      <div className="text-lg font-bold text-white">{service.price}<span className="text-xs text-indigo-300">/mo</span></div>
-                      <div className="mt-2 flex items-center justify-between">
+                      <div className="text-lg sm:text-xl font-bold text-white mb-2 sm:mb-3">
+                        {service.price}
+                        <span className="text-xs text-indigo-300">/mo</span>
+                      </div>
+                      <div className="flex items-center justify-between">
                         <div className="flex">
                           {/* Show first 3 avatars */}
                           {service.members.slice(0, 3).map((avatar, idx) => (
-                            <div key={idx} className={`w-6 h-6 rounded-full overflow-hidden border border-indigo-500/30 ${idx > 0 ? '-ml-1' : ''}`}>
+                            <div key={idx} className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full overflow-hidden border border-indigo-500/30 bg-indigo-800 ${idx > 0 ? '-ml-1' : ''}`}>
                               <Image
                                 src={avatar}
                                 alt="User avatar"
-                                width={24}
-                                height={24}
+                                width={28}
+                                height={28}
                                 className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  // Fallback to colored circle if image fails
+                                  e.currentTarget.style.display = 'none';
+                                  e.currentTarget.parentElement.style.background = 'linear-gradient(135deg, #6366f1, #8b5cf6)';
+                                }}
                               />
                             </div>
                           ))}
                           {/* Show count of additional members if more than 3 */}
                           {service.memberCount > 3 && (
-                            <div className="w-6 h-6 rounded-full bg-black/30 flex items-center justify-center text-xs text-white -ml-1 border border-indigo-500/30">
+                            <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-indigo-700/60 flex items-center justify-center text-xs font-semibold text-white -ml-1 border border-indigo-500/30">
                               +{service.memberCount - 3}
                             </div>
                           )}
                         </div>
-                        <span className="text-xs text-indigo-300">{service.memberCount} members</span>
+                        <span className="text-xs sm:text-sm text-indigo-300">{service.memberCount} members</span>
                       </div>
                     </div>
                   ))}
                 </div>
-                <div className="mt-4 p-3 bg-indigo-600/20 rounded-lg border border-indigo-500/30">
-                  <div className="flex justify-between mb-2">
-                    <span className="text-sm font-medium text-white">Your Monthly Savings</span>
-                    <span className="text-sm font-bold text-green-400">₹780</span>
+                <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-indigo-600/20 rounded-lg border border-indigo-500/30">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-3">
+                    <span className="text-sm sm:text-base font-medium text-white mb-1 sm:mb-0">Your Monthly Savings</span>
+                    <span className="text-lg sm:text-xl font-bold text-green-400">₹780</span>
                   </div>
-                  <div className="w-full bg-indigo-800/30 rounded-full h-2">
-                    <div className="bg-gradient-to-r from-blue-400 to-purple-600 h-2 rounded-full w-2/3"></div>
+                  <div className="w-full bg-indigo-800/30 rounded-full h-2 sm:h-3">
+                    <motion.div 
+                      className="bg-gradient-to-r from-blue-400 to-purple-600 h-full rounded-full"
+                      initial={{ width: 0 }}
+                      animate={{ width: '67%' }}
+                      transition={{ duration: 1.5, delay: 0.5 }}
+                    />
+                  </div>
+                  <div className="mt-2 sm:mt-3 text-xs sm:text-sm text-indigo-300">
+                    You're saving 67% compared to individual subscriptions
                   </div>
                 </div>
               </div>

@@ -10,7 +10,7 @@ const stats = [
     description: "Users managing subscriptions on our platform"
   },
   {
-    value: "$2.4M+",
+    value: "₹2.4M+",
     label: "Saved Annually",
     description: "Total annual savings across all users"
   },
